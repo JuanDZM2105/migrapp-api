@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using migrapp_api;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -7,10 +10,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDbContext<AppDbContext>(opciones => 
+    opciones.UseSqlServer("name=DefaultConnection"));
+
 builder.Services.AddOutputCache(opciones =>
 {
     opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(30);
 });
+
+builder.Services.AddSingleton<IRepositorio, RepositorioSQLServer>();
 
 var origenesPermitidos = builder.Configuration.GetValue<string>("origenesPermitidos")!.Split(",");
 

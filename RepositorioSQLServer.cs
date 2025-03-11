@@ -2,11 +2,11 @@
 
 namespace migrapp_api
 {
-    public class RepositorioEnMemoria: IRepositorio
+    public class RepositorioSQLServer : IRepositorio
     {
         private List<User> _users;
 
-        public RepositorioEnMemoria()
+        public RepositorioSQLServer()
         {
             _users = new List<User>
             {
@@ -60,4 +60,5 @@ namespace migrapp_api
             _users.Add(user);
         }
     }
+
 }
