@@ -50,7 +50,23 @@ namespace migrapp_api.Controllers
             return await context.Users.ProjectTo<UserDTO>(Mapper.ConfigurationProvider).ToListAsync();
         }
 
-       
+        [HttpGet("{id:int}", Name = "ObtenerUsuarioPorId")]
+        [OutputCache(Tags = ["users"])]
+        public async Task<ActionResult<UserDTO>> Get(int id)
+        {
+            var user = await context.Users
+                .ProjectTo<UserDTO>(Mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(u => u.id == id);
+
+            if(user is null)
+            {
+                return NotFound();
+            }
+
+            return user;
+
+        }
+
 
         [HttpPost()]
         public async Task<IActionResult> Post(int id, [FromBody] UsersCreateDTO UserCreateDTO)
@@ -58,13 +74,29 @@ namespace migrapp_api.Controllers
             var user = Mapper.Map<User>(UserCreateDTO);
             context.Add(user);
             await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync("users", default);   
             return CreatedAtRoute("ObtenerUsuarioPorId", new {id = user.id}, user);
 
         }
 
-        [HttpPut]
-        public void Put()
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> Put(int id, [FromBody] UsersCreateDTO usersCreateDTO)
         {
+            var userExists = await context.Users.AnyAsync(u => u.id == id);
+            if (!userExists)
+            {
+                return NotFound();
+            }
+
+            var user = Mapper.Map<User>(usersCreateDTO);
+            user.id = id;
+
+            context.Update(user);
+            await context.SaveChangesAsync();
+            await outputCacheStore.EvictByTagAsync("users", default);
+
+            return NoContent();
+
 
         }
 
