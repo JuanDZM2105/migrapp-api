@@ -1,5 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.EntityFrameworkCore;
+using migrapp_api.DTOs;
 using migrapp_api.Entidades;
 using System.Threading.Tasks;
 
@@ -14,16 +18,20 @@ namespace migrapp_api.Controllers
         private readonly IConfiguration configuration;
         private readonly AppDbContext context;
 
+        public IMapper Mapper { get; }
+
         public UsersController(IRepositorio repositorio,
             IOutputCacheStore outputCacheStore,
             IConfiguration configuration,
-            AppDbContext context
+            AppDbContext context,
+            IMapper mapper
             ) 
         {
             this.repositorio = repositorio;
             this.outputCacheStore = outputCacheStore;
             this.configuration = configuration;
             this.context = context;
+            Mapper = mapper;
         }
 
 
@@ -36,32 +44,18 @@ namespace migrapp_api.Controllers
 
         [HttpGet]
         [OutputCache(Tags = ["users"])]
-        public List<User> Get()
+        public async Task<List<UserDTO>> Get()
         {
-            
-            var users = repositorio.ObtenerTodosLosUsuarios();
-            return users;
+
+            return await context.Users.ProjectTo<UserDTO>(Mapper.ConfigurationProvider).ToListAsync();
         }
 
-        [HttpGet("{id:int}", Name = "ObtenerUsuarioPorId")]
-        [OutputCache(Tags = ["users"])]
-        public async Task<ActionResult<User>> Get(int id)
-        {
-            
-            var user = await repositorio.ObtenerPorId(id);
-
-            if (user is null)
-            {
-                return NotFound();
-            }
-
-            return user;
-        }
-
+       
 
         [HttpPost()]
-        public async Task<IActionResult> Post(int id, [FromBody] User user)
+        public async Task<IActionResult> Post(int id, [FromBody] UsersCreateDTO UserCreateDTO)
         {
+            var user = Mapper.Map<User>(UserCreateDTO);
             context.Add(user);
             await context.SaveChangesAsync();
             return CreatedAtRoute("ObtenerUsuarioPorId", new {id = user.id}, user);
