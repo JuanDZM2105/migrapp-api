@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using migrapp_api;
+using migrapp_api.Data;
+using migrapp_api.Repositories;
+using migrapp_api.Services.admin;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddDbContext<AppDbContext>(opciones => 
+builder.Services.AddDbContext<ApplicationDbContext>(opciones => 
     opciones.UseSqlServer("name=DefaultConnection"));
 
 builder.Services.AddOutputCache(opciones =>
@@ -20,7 +22,11 @@ builder.Services.AddOutputCache(opciones =>
     opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(30);
 });
 
-builder.Services.AddSingleton<IRepositorio, RepositorioSQLServer>();
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 var origenesPermitidos = builder.Configuration.GetValue<string>("origenesPermitidos")!.Split(",");
 
