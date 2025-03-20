@@ -24,10 +24,12 @@
 
   <ItemGroup>
     <Folder Include="Controllers\client\" />
+    <Folder Include="Controllers\client\" />
+    <Folder Include="DTOs\client\" />
     <Folder Include="DTOs\client\" />
     <Folder Include="Helpers\" />
-    <Folder Include="Services\client\" />
     <Folder Include="Tests\" />
+    <Folder Include="Services\client\" />
     <Folder Include="Validators\" />
   </ItemGroup>
 
