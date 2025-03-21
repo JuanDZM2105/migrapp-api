@@ -1,4 +1,4 @@
-﻿using migrapp_api.DTOs;
+﻿using migrapp_api.DTOs.admin;
 
 namespace migrapp_api.Services.admin
 {

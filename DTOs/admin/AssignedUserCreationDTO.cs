@@ -1,4 +1,4 @@
-﻿namespace migrapp_api.DTOs
+﻿namespace migrapp_api.DTOs.admin
 {
     public class AssignedUserCreationDTO
     {

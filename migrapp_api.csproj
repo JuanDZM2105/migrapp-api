@@ -28,6 +28,7 @@
     <Folder Include="DTOs\client\" />
     <Folder Include="DTOs\client\" />
     <Folder Include="Helpers\" />
+    <Folder Include="Migrations\" />
     <Folder Include="Tests\" />
     <Folder Include="Services\client\" />
     <Folder Include="Validators\" />

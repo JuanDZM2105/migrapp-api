@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using migrapp_api.DTOs;
+using migrapp_api.DTOs.admin;
 using migrapp_api.Services.admin;
 
 namespace migrapp_api.Controllers.admin

@@ -1,4 +1,4 @@
-﻿using migrapp_api.DTOs;
+﻿using migrapp_api.DTOs.admin;
 using migrapp_api.Entidades;
 using migrapp_api.Repositories;
 using AutoMapper;
