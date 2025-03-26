@@ -13,17 +13,21 @@ namespace migrapp_api.Entidades
         [Required, MaxLength(100)]
         public string Name { get; set; }
 
+        public string LastName { get; set; }
+
         [Required, MaxLength(150)]
         public string Email { get; set; }
 
         [Required]
         public string PasswordHash { get; set; }
 
+        public string PhonePrefix { get; set; }
+
         [MaxLength(20)]
         public string Phone { get; set; }
 
         [MaxLength(200)]
-        public string Address { get; set; }
+        public string Country { get; set; }
 
         public DateTime? BirthDate { get; set; }
 

@@ -1,7 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using migrapp_api.Data;
 using migrapp_api.Repositories;
-using migrapp_api.Services.admin;
+using migrapp_api.Services.Admin;
+using migrapp_api.Seeding;
+using FluentValidation;
+using migrapp_api.Validators.Admin;
+using migrapp_api.Validators.Admin;
+using Microsoft.AspNetCore.Identity;
+using migrapp_api.Entidades;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,20 +31,34 @@ builder.Services.AddOutputCache(opciones =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAdminUserService, AdminUserService>();
+builder.Services.AddScoped<IAssignedUserRepository, AssignedUserRepository>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserByAdminDtoValidator>();
+
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 
 var origenesPermitidos = builder.Configuration.GetValue<string>("origenesPermitidos")!.Split(",");
 
-builder.Services.AddCors(opciones =>
+builder.Services.AddCors(options =>
 {
-opciones.AddDefaultPolicy(opcionesCORS =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        opcionesCORS.WithOrigins(origenesPermitidos).AllowAnyMethod().AllowAnyHeader();
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    DbSeeder.Seed(context);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -52,6 +72,8 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 app.UseOutputCache();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
