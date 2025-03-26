@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using migrapp_api.DTOs.Admin;
 using migrapp_api.Services.Admin;
 using migrapp_api.Repositories;
@@ -7,6 +8,7 @@ namespace migrapp_api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/users")]
+    [Authorize(Roles = "admin")] // 👈 Solo admin puede acceder
     public class AdminUsersController : ControllerBase
     {
         private readonly IAdminUserService _adminUserService;

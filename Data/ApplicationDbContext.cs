@@ -16,6 +16,8 @@ namespace migrapp_api.Data
         public DbSet<LegalProcessDocument> LegalProcessDocuments { get; set; }
         public DbSet<AssignedUser> AssignedUsers { get; set; }
         public DbSet<UserLog> UserLogs { get; set; }
+        public DbSet<UserMfaCode> UserMfaCodes { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

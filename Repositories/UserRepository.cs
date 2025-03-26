@@ -12,5 +12,7 @@ public class UserRepository : IUserRepository
 
     public async Task<List<User>> GetUsersByTypeAsync(string userType) =>
         await _context.Set<User>().Where(u => u.UserType == userType).ToListAsync();
+    public async Task<User?> GetByEmailAsync(string email) =>
+    await _context.Set<User>().FirstOrDefaultAsync(u => u.Email == email);
 }
 
