@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using migrapp_api.DTOs.Admin;
 using migrapp_api.Services.Admin;
 using migrapp_api.Repositories;
+using System.Security.Claims;
 
 namespace migrapp_api.Controllers.Admin
 {
@@ -35,6 +36,31 @@ namespace migrapp_api.Controllers.Admin
         {
             var users = await _userRepository.GetUsersByTypeAsync("user");
             return Ok(users.Select(u => new { u.UserId, u.Name, u.LastName, u.Email }));
+        }
+
+        [HttpGet("profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                // Obtener el userId del token JWT
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Llamar al servicio para obtener el perfil del usuario
+                var userProfile = await _adminUserService.GetProfileAsync(userId);
+
+                if (userProfile == null)
+                {
+                    return NotFound(new { message = "Usuario no encontrado" });
+                }
+
+                return Ok(userProfile);
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error interno", details = ex.Message });
+            }
         }
     }
 }

@@ -70,5 +70,32 @@ namespace migrapp_api.Services.Admin
             return true;
         }
 
+        public async Task<UserProfileDto> GetProfileAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            // Mapear la entidad a un DTO
+            var userProfile = new UserProfileDto
+            {
+                Name = user.Name,
+                LastName = user.LastName,
+                Email = user.Email,
+                Country = user.Country,
+                Phone = user.Phone,
+                PhonePrefix = user.PhonePrefix,
+                UserType = user.UserType,
+                AccountStatus = user.AccountStatus,
+                AccountCreated = user.AccountCreated,
+                BirthDate = user.BirthDate,
+            };
+
+            return userProfile;
+        }
+
     }
 }

@@ -3,6 +3,7 @@ using migrapp_api.DTOs.Auth;
 using migrapp_api.Entidades;
 using migrapp_api.Helpers;
 using migrapp_api.Repositories;
+using System.Security.Cryptography;
 
 public class LoginService : ILoginService
 {
@@ -43,16 +44,24 @@ public class LoginService : ILoginService
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null) throw new Exception("Usuario no encontrado");
 
-        var code = new Random().Next(100000, 999999).ToString();
+        // Generar código seguro con RandomNumberGenerator
+        var randomNumber = new byte[6];
+        using (var rng = RandomNumberGenerator.Create())
+        {
+            rng.GetBytes(randomNumber);
+        }
+        var code = BitConverter.ToUInt32(randomNumber, 0) % 1000000;
 
-        await _mfaCodeRepository.SaveCodeAsync(email, code);
+        // Guardar el código en la base de datos
+        await _mfaCodeRepository.SaveCodeAsync(email, code.ToString("D6"));
 
+        // Enviar el código según el método de MFA (Email o SMS)
         if (mfaMethod == "email")
-            await _emailHelper.SendEmailAsync(user.Email, "Tu código de verificación", $"Tu código es: {code}");
+            await _emailHelper.SendEmailAsync(user.Email, "Tu código de verificación", $"Tu código es: {code:D6}");
         else if (mfaMethod == "sms")
-            await _smsHelper.SendSmsAsync(user.PhonePrefix + user.Phone, $"Tu código es: {code}");
+            await _smsHelper.SendSmsAsync(user.PhonePrefix + user.Phone, $"Tu código es: {code:D6}");
 
-        return code;
+        return code.ToString("D6");  // Retorna el código MFA generado
     }
 
     public async Task<bool> VerifyMfaCodeAsync(string email, string code)
@@ -68,7 +77,7 @@ public class LoginService : ILoginService
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null) return null;
 
-        var token = _jwtTokenGenerator.GenerateToken(user.Email, user.UserType);
+        var token = _jwtTokenGenerator.GenerateToken(user.Email, user.UserType, user.UserId);
 
         return new AuthResponseDto
         {

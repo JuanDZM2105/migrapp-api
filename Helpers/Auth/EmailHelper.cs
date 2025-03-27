@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using migrapp_api.Entidades;
 
 namespace migrapp_api.Helpers
 {
@@ -36,11 +37,12 @@ namespace migrapp_api.Helpers
             _configuration = configuration;
         }
 
-        public string GenerateToken(string email, string userType)
+        public string GenerateToken(string email, string userType, int userId)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, email),
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim(ClaimTypes.Email, email),
                 new Claim("role", userType),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };

@@ -6,4 +6,6 @@ public interface IUserRepository
     Task SaveChangesAsync();
     Task<List<User>> GetUsersByTypeAsync(string userType);
     Task<User?> GetByEmailAsync(string email);
+
+    Task<User> GetByIdAsync(int userId);
 }

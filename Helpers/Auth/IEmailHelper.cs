@@ -14,6 +14,6 @@ namespace migrapp_api.Helpers
 
     public interface IJwtTokenGenerator
     {
-        string GenerateToken(string email, string userType);
+        string GenerateToken(string email, string userType, int userId);
     }
 }
