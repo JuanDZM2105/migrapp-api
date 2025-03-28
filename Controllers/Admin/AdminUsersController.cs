@@ -62,5 +62,12 @@ namespace migrapp_api.Controllers.Admin
                 return StatusCode(500, new { message = "Ocurrió un error interno", details = ex.Message });
             }
         }
+
+        [HttpGet("filters")]
+        public async Task<IActionResult> GetFilters()
+        {
+            var filters = await _adminUserService.GetFiltersAsync();
+            return Ok(filters);
+        }
     }
 }

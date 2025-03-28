@@ -20,5 +20,13 @@ public class UserRepository : IUserRepository
         return await _context.Users
              .FirstOrDefaultAsync(u => u.UserId == userId);
     }
+    public async Task<List<string>> GetDistinctCountriesAsync()
+    {
+        return await _context.Set<User>()
+            .Where(u => !string.IsNullOrEmpty(u.Country))
+            .Select(u => u.Country)
+            .Distinct()
+            .ToListAsync();
+    }
 }
 

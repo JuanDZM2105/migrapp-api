@@ -7,5 +7,7 @@ namespace migrapp_api.Services.Admin
         Task<bool> CreateUserAsync(CreateUserByAdminDto dto);
 
         Task<UserProfileDto> GetProfileAsync(int userId);
+
+        Task<FiltersDto> GetFiltersAsync();
     }
 }

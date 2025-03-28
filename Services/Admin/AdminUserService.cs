@@ -97,5 +97,18 @@ namespace migrapp_api.Services.Admin
             return userProfile;
         }
 
+        public async Task<FiltersDto> GetFiltersAsync()
+        {
+            var filters = new FiltersDto
+            {
+                // Filtros estáticos, puedes modificar esto si prefieres que se obtengan de la base de datos
+                UserTypes = new List<string> { "user", "admin", "lawyer", "auditor" },
+                AccountStatuses = new List<string> { "active", "blocked", "eliminated" },
+                Countries = await _userRepository.GetDistinctCountriesAsync(), // Método en el repositorio
+                IsActiveNow = new List<bool> { true, false }
+            };
+
+            return filters;
+        }
     }
 }
