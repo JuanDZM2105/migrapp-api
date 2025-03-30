@@ -17,7 +17,7 @@ namespace migrapp_api.Data
         public DbSet<AssignedUser> AssignedUsers { get; set; }
         public DbSet<UserLog> UserLogs { get; set; }
         public DbSet<UserMfaCode> UserMfaCodes { get; set; }
-
+        public DbSet<ColumnVisibility> ColumnVisibilities { get; set; } // Aquí agregamos el DbSet de ColumnVisibility
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -68,6 +68,13 @@ namespace migrapp_api.Data
                 .WithMany(u => u.UserLogs)
                 .HasForeignKey(ul => ul.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación entre User y ColumnVisibility
+            modelBuilder.Entity<ColumnVisibility>()
+                .HasOne(cv => cv.User)
+                .WithMany() // Un usuario puede tener una configuración de columnas
+                .HasForeignKey(cv => cv.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Si el usuario se elimina, se elimina la configuración de columnas
         }
     }
 }

@@ -14,11 +14,13 @@ namespace migrapp_api.Controllers.Admin
     {
         private readonly IAdminUserService _adminUserService;
         private readonly IUserRepository _userRepository;
+        private readonly IColumnVisibilityService _columnVisibilityService;
 
-        public AdminUsersController(IAdminUserService adminUserService, IUserRepository userRepository)
+        public AdminUsersController(IAdminUserService adminUserService, IUserRepository userRepository, IColumnVisibilityService columnVisibilityService) 
         {
             _adminUserService = adminUserService;
             _userRepository = userRepository;
+            _columnVisibilityService = columnVisibilityService;
         }
 
         [HttpPost]
@@ -63,11 +65,51 @@ namespace migrapp_api.Controllers.Admin
             }
         }
 
+        [HttpPatch("profile")]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Llamar al servicio para actualizar el perfil
+                var result = await _adminUserService.UpdateUserProfileAsync(userId, dto);
+
+                if (!result)
+                {
+                    return BadRequest(new { message = "Error al actualizar el perfil" });
+                }
+
+                return Ok(new { message = "Perfil actualizado con éxito" });
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error interno", details = ex.Message });
+            }
+        }
+
         [HttpGet("filters")]
         public async Task<IActionResult> GetFilters()
         {
             var filters = await _adminUserService.GetFiltersAsync();
             return Ok(filters);
+        }
+
+        [HttpGet("columns/available")]
+        public async Task<IActionResult> GetAvailableColumns()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var columns = await _columnVisibilityService.GetAvailableColumnsAsync(userId);
+            return Ok(columns);
+        }
+
+        [HttpPost("columns")]
+        public async Task<IActionResult> SaveColumnVisibility([FromBody] SaveColumnVisibilityDto dto)
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            await _columnVisibilityService.SaveColumnVisibilityAsync(userId, dto);
+            return Ok(new { message = "Configuración de columnas guardada" });
         }
     }
 }

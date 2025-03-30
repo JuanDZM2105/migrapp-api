@@ -9,5 +9,9 @@ namespace migrapp_api.Services.Admin
         Task<UserProfileDto> GetProfileAsync(int userId);
 
         Task<FiltersDto> GetFiltersAsync();
+
+        Task<bool> UpdateUserProfileAsync(int UserId, UpdateProfileDto dto);
+
+
     }
 }

@@ -110,5 +110,31 @@ namespace migrapp_api.Services.Admin
 
             return filters;
         }
+
+        public async Task<bool> UpdateUserProfileAsync(int userId, UpdateProfileDto dto)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null) return false;
+
+            if (!string.IsNullOrEmpty(dto.Name))
+                user.Name = dto.Name;
+
+            if (!string.IsNullOrEmpty(dto.LastName))
+                user.LastName = dto.LastName;
+
+            if (!string.IsNullOrEmpty(dto.Country))
+                user.Country = dto.Country;
+
+            if (!string.IsNullOrEmpty(dto.Phone))
+                user.Phone = dto.Phone;
+
+            if (!string.IsNullOrEmpty(dto.PhonePrefix))
+                user.PhonePrefix = dto.PhonePrefix;
+
+            // Guardar los cambios
+            await _userRepository.SaveChangesAsync();
+            return true;
+        }
     }
 }

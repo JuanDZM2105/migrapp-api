@@ -35,6 +35,7 @@ builder.Services.AddOutputCache(opciones =>
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IColumnVisibilityRepository, ColumnVisibilityRepository>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
 builder.Services.AddScoped<IAssignedUserRepository, AssignedUserRepository>();
 builder.Services.AddScoped<ILoginService, LoginService>();
@@ -42,6 +43,8 @@ builder.Services.AddScoped<IMfaCodeRepository, MfaCodeRepository>();
 builder.Services.AddSingleton<IEmailHelper, EmailHelper>();
 builder.Services.AddSingleton<ISmsHelper, SmsHelper>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
+
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserByAdminDtoValidator>();
 
