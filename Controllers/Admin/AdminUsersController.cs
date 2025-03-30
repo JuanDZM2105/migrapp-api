@@ -96,6 +96,31 @@ namespace migrapp_api.Controllers.Admin
             return Ok(filters);
         }
 
+        [HttpPatch("bulk-edit")]
+        public async Task<IActionResult> BulkEdit([FromBody] BulkEditDto dto)
+        {
+            try
+            {
+                var result = await _adminUserService.BulkEditUsersAsync(dto);
+                if (result)
+                {
+                    return Ok(new { message = "Usuarios actualizados correctamente." });
+                }
+                return BadRequest(new { message = "Error al actualizar usuarios." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("bulk-edit/fields")]
+        public async Task<IActionResult> GetBulkEditFields()
+        {
+            var fields = await _adminUserService.GetBulkEditFieldsAsync();
+            return Ok(fields);
+        }
+
         [HttpGet("columns/available")]
         public async Task<IActionResult> GetAvailableColumns()
         {

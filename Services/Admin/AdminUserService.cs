@@ -101,7 +101,6 @@ namespace migrapp_api.Services.Admin
         {
             var filters = new FiltersDto
             {
-                // Filtros estáticos, puedes modificar esto si prefieres que se obtengan de la base de datos
                 UserTypes = new List<string> { "user", "admin", "lawyer", "auditor" },
                 AccountStatuses = new List<string> { "active", "blocked", "eliminated" },
                 Countries = await _userRepository.GetDistinctCountriesAsync(), // Método en el repositorio
@@ -109,6 +108,61 @@ namespace migrapp_api.Services.Admin
             };
 
             return filters;
+        }
+
+        public async Task<List<BulkEditFieldDto>> GetBulkEditFieldsAsync()
+        {
+            // Definir los campos editables.
+            var fields = new List<BulkEditFieldDto>
+            {
+                new BulkEditFieldDto { Field = "accountStatus", Label = "Estado de cuenta" },
+                new BulkEditFieldDto { Field = "userType", Label = "Tipo de usuario" }
+            };
+
+            return fields;
+        }
+
+        public async Task<bool> BulkEditUsersAsync(BulkEditDto dto)
+        {
+            var validFields = new List<string> { "accountStatus", "userType" };
+
+            if (!validFields.Contains(dto.Field)) 
+            {
+                throw new ArgumentException("Campo no válido.");
+            }
+
+            // Validamos los valores 
+            if (dto.Field == "accountStatus" && !new List<string> { "active", "blocked", "eliminated" }.Contains(dto.Value))
+            {
+                throw new ArgumentException("Valor no válido para 'accountStatus'.");
+            }
+
+            if (dto.Field == "userType" && !new List<string> { "user", "admin", "lawyer", "auditor" }.Contains(dto.Value))
+            {
+                throw new ArgumentException("Valor no válido para 'userType'.");
+            }
+
+            var users = await _userRepository.GetUsersByIdsAsync(dto.UserIds);
+            if (users == null || !users.Any())
+            {
+                throw new Exception("No se encontraron usuarios con los IDs proporcionados.");
+            }
+
+            // Modificar el campo seleccionado para los usuarios
+            foreach (var user in users)
+            {
+                if (dto.Field == "accountStatus")
+                {
+                    user.AccountStatus = dto.Value;  
+                }
+                else if (dto.Field == "userType")
+                {
+                    user.UserType = dto.Value;  
+                }
+            }
+
+            await _userRepository.SaveChangesAsync();  
+            return true;
         }
 
         public async Task<bool> UpdateUserProfileAsync(int userId, UpdateProfileDto dto)

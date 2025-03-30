@@ -9,4 +9,5 @@ public interface IUserRepository
 
     Task<User> GetByIdAsync(int userId);
     Task<List<string>> GetDistinctCountriesAsync();
+    Task<List<User>> GetUsersByIdsAsync(List<int> userIds);
 }
