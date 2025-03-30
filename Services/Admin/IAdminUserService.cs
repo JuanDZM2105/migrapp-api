@@ -9,5 +9,10 @@ namespace migrapp_api.Services.Admin
         Task<UserProfileDto> GetProfileAsync(int userId);
 
         Task<FiltersDto> GetFiltersAsync();
+
+        Task<List<BulkEditFieldDto>> GetBulkEditFieldsAsync();
+
+        Task<bool> BulkEditUsersAsync(BulkEditDto dto);
+
     }
 }
