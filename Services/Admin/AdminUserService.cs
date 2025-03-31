@@ -12,15 +12,18 @@ namespace migrapp_api.Services.Admin
         private readonly IUserRepository _userRepository;
         private readonly IAssignedUserRepository _assignedUserRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IColumnVisibilityRepository _columnVisibilityRepository;
 
         public AdminUserService(
             IUserRepository userRepository,
             IAssignedUserRepository assignedUserRepository,
-            IPasswordHasher<User> passwordHasher)
+            IPasswordHasher<User> passwordHasher,
+            IColumnVisibilityRepository columnVisibilityRepository)
         {
             _userRepository = userRepository;
             _assignedUserRepository = assignedUserRepository;
             _passwordHasher = passwordHasher;
+            _columnVisibilityRepository = columnVisibilityRepository;
         }
 
         public async Task<bool> CreateUserAsync(CreateUserByAdminDto dto)
@@ -190,5 +193,54 @@ namespace migrapp_api.Services.Admin
             await _userRepository.SaveChangesAsync();
             return true;
         }
+
+        public async Task<List<UserDto>> GetUsersWithFullInfoAsync(UserQueryParams queryParams, int userId)
+        {
+            // Obtener la configuración de columnas del usuario
+            var columnVisibility = await _columnVisibilityRepository.GetByUserIdAsync(userId);
+
+            // Si el usuario no tiene configuración de columnas, crear una predeterminada
+            if (columnVisibility == null)
+            {
+                columnVisibility = new ColumnVisibility
+                {
+                    UserId = userId,
+                    VisibleColumns = string.Join(",", new List<string> { "name", "email", "country", "phone", "accountStatus", "userType" })
+                };
+                await _columnVisibilityRepository.SaveColumnVisibilityAsync(columnVisibility);
+            }
+
+            var visibleColumns = columnVisibility.VisibleColumns.Split(',').ToList();
+
+            // Llamar al repositorio para obtener los usuarios
+            var users = await _userRepository.GetUsersWithFullInfoAsync(queryParams);
+
+            // Convertir las entidades de usuarios a DTOs y aplicar la visibilidad de columnas
+            var userDtos = users.Select(user =>
+            {
+                var userDto = new UserDto
+                {
+                    UserId = user.UserId,
+                    Name = visibleColumns.Contains("name") ? user.Name : null,
+                    LastName = visibleColumns.Contains("lastName") ? user.LastName : null,
+                    Email = visibleColumns.Contains("email") ? user.Email : null,
+                    Phone = visibleColumns.Contains("phone") ? user.Phone : null,
+                    PhonePrefix = visibleColumns.Contains("phonePrefix") ? user.PhonePrefix : null,
+                    Country = visibleColumns.Contains("country") ? user.Country : null,
+                    AccountStatus = visibleColumns.Contains("accountStatus") ? user.AccountStatus : null,
+                    UserType = visibleColumns.Contains("userType") ? user.UserType : null,
+                    BirthDate = visibleColumns.Contains("birthDate") ? user.BirthDate : null,
+                    AccountCreated = visibleColumns.Contains("accountCreated") ? user.AccountCreated : null,
+                    LastLogin = visibleColumns.Contains("lastLogin") ? user.LastLogin : null,
+                    IsActiveNow = visibleColumns.Contains("isActiveNow") ? user.IsActiveNow : null
+                };
+
+                return userDto;
+            }).ToList();
+
+            return userDtos;
+        }
+
+
     }
 }

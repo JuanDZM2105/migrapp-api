@@ -9,7 +9,7 @@ namespace migrapp_api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/users")]
-    [Authorize(Roles = "admin")] // 👈 Solo admin puede acceder
+    [Authorize(Roles = "admin")]
     public class AdminUsersController : ControllerBase
     {
         private readonly IAdminUserService _adminUserService;
@@ -136,5 +136,32 @@ namespace migrapp_api.Controllers.Admin
             await _columnVisibilityService.SaveColumnVisibilityAsync(userId, dto);
             return Ok(new { message = "Configuración de columnas guardada" });
         }
+
+        [HttpGet("full-info")]
+        [Authorize]
+        public async Task<IActionResult> GetUsersWithFullInfo([FromQuery] UserQueryParams queryParams)
+        {
+            try
+            {
+                // Obtener el userId del token JWT
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Llamar al servicio que manejará la lógica de obtención de datos
+                var users = await _adminUserService.GetUsersWithFullInfoAsync(queryParams, userId);
+
+                if (users == null || !users.Any())
+                {
+                    return NotFound(new { message = "No se encontraron usuarios." });
+                }
+
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener los usuarios", details = ex.Message });
+            }
+        }
+
+
     }
 }

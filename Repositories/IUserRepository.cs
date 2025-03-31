@@ -1,4 +1,5 @@
-﻿using migrapp_api.Entidades;
+﻿using migrapp_api.DTOs.Admin;
+using migrapp_api.Entidades;
 
 public interface IUserRepository
 {
@@ -10,4 +11,5 @@ public interface IUserRepository
     Task<User> GetByIdAsync(int userId);
     Task<List<string>> GetDistinctCountriesAsync();
     Task<List<User>> GetUsersByIdsAsync(List<int> userIds);
+    Task<List<User>> GetUsersWithFullInfoAsync(UserQueryParams queryParams);
 }

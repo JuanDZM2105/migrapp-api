@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using migrapp_api.Data;
+using migrapp_api.DTOs.Admin;
 using migrapp_api.Entidades;
 
 public class UserRepository : IUserRepository
@@ -34,5 +35,60 @@ public class UserRepository : IUserRepository
             .Where(u => userIds.Contains(u.UserId))  
             .ToListAsync();  
     }
+
+    public async Task<List<User>> GetUsersWithFullInfoAsync(UserQueryParams queryParams)
+    {
+        var query = _context.Users.AsQueryable();
+
+        // Filtrar por nombre si se proporciona
+        if (!string.IsNullOrEmpty(queryParams.Name))
+        {
+            query = query.Where(u => u.Name.Contains(queryParams.Name));
+        }
+
+        // Filtrar por correo electrónico si se proporciona
+        if (!string.IsNullOrEmpty(queryParams.Email))
+        {
+            query = query.Where(u => u.Email.Contains(queryParams.Email));
+        }
+
+        // Filtrar por tipo de usuario si se proporciona
+        if (!string.IsNullOrEmpty(queryParams.UserType))
+        {
+            query = query.Where(u => u.UserType == queryParams.UserType);
+        }
+
+        // Filtrar por estado de cuenta si se proporciona
+        if (!string.IsNullOrEmpty(queryParams.AccountStatus))
+        {
+            query = query.Where(u => u.AccountStatus == queryParams.AccountStatus);
+        }
+
+        // Filtrar por país si se proporciona
+        if (!string.IsNullOrEmpty(queryParams.Country))
+        {
+            query = query.Where(u => u.Country.Contains(queryParams.Country));
+        }
+
+        // Ordenar por el campo proporcionado
+        if (queryParams.SortBy == "name")
+        {
+            query = queryParams.SortDirection == "asc" ? query.OrderBy(u => u.Name) : query.OrderByDescending(u => u.Name);
+        }
+        else if (queryParams.SortBy == "email")
+        {
+            query = queryParams.SortDirection == "asc" ? query.OrderBy(u => u.Email) : query.OrderByDescending(u => u.Email);
+        }
+        // Agregar más campos si es necesario
+
+        // Paginación
+        var users = await query
+            .Skip((queryParams.Page - 1) * queryParams.PageSize)
+            .Take(queryParams.PageSize)
+            .ToListAsync();
+
+        return users;
+    }
+
 }
 
