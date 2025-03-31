@@ -27,6 +27,7 @@ namespace migrapp_api.Seeding
                 .RuleFor(u => u.AccountStatus, f => f.PickRandom("active", "eliminated", "blocked"))
                 .RuleFor(u => u.LastLogin, f => f.Date.Recent(30))
                 .RuleFor(u => u.IsActiveNow, f => f.Random.Bool())
+                .RuleFor(u => u.HasAccessToAllUsers, f => f.Random.Bool()) // Nueva propiedad HasAccessToAllUsers
                 .RuleFor(u => u.Documents, _ => new List<Document>())
                 .RuleFor(u => u.ClientLegalProcesses, _ => new List<LegalProcess>())
                 .RuleFor(u => u.LawyerLegalProcesses, _ => new List<LegalProcess>())

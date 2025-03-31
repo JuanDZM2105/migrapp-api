@@ -9,7 +9,7 @@ namespace migrapp_api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/users")]
-    [Authorize(Roles = "admin")]
+    
     public class AdminUsersController : ControllerBase
     {
         private readonly IAdminUserService _adminUserService;
@@ -151,7 +151,7 @@ namespace migrapp_api.Controllers.Admin
 
                 if (users == null || !users.Any())
                 {
-                    return NotFound(new { message = "No se encontraron usuarios." });
+                    return NotFound(new { message = "No se encontraron usuarios. 1" });
                 }
 
                 return Ok(users);

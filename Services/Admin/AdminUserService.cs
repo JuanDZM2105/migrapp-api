@@ -39,7 +39,8 @@ namespace migrapp_api.Services.Admin
                 PasswordHash = _passwordHasher.HashPassword(null, dto.Password),
                 AccountStatus = "active",
                 UserType = dto.UserType,
-                AccountCreated = DateTime.UtcNow
+                AccountCreated = DateTime.UtcNow,
+                HasAccessToAllUsers = dto.HasAccessToAllUsers // Aquí asignamos el valor
             };
 
             await _userRepository.AddAsync(newUser);
@@ -47,13 +48,13 @@ namespace migrapp_api.Services.Admin
 
             // 🔸 Validación con helper: si se requiere asignar usuarios y no se asignó ninguno, lanzar excepción
             if (UserAssignmentHelper.RequiresAssignments(dto.UserType, dto.HasAccessToAllUsers)
-                && (dto.AssignedUserIds == null || !dto.AssignedUserIds.Any()))
+                && (dto.AssignedUserIds == null || !dto.AssignedUserIds.Any()) && !newUser.HasAccessToAllUsers)
             {
                 throw new Exception("Debe asignar usuarios si el nuevo usuario no tiene acceso total.");
             }
 
-            // 🔸 Agregamos asignaciones si corresponde
-            if (UserAssignmentHelper.RequiresAssignments(dto.UserType, dto.HasAccessToAllUsers))
+            // 🔸 Si HasAccessToAllUsers es false, agregamos las asignaciones de usuarios
+            if (!newUser.HasAccessToAllUsers && UserAssignmentHelper.RequiresAssignments(dto.UserType, dto.HasAccessToAllUsers))
             {
                 foreach (var assignedUserId in dto.AssignedUserIds)
                 {
@@ -72,6 +73,7 @@ namespace migrapp_api.Services.Admin
 
             return true;
         }
+
 
         public async Task<UserProfileDto> GetProfileAsync(int userId)
         {
@@ -213,7 +215,7 @@ namespace migrapp_api.Services.Admin
             var visibleColumns = columnVisibility.VisibleColumns.Split(',').ToList();
 
             // Llamar al repositorio para obtener los usuarios
-            var users = await _userRepository.GetUsersWithFullInfoAsync(queryParams);
+            var users = await _userRepository.GetUsersWithFullInfoAsync(queryParams, userId);
 
             // Convertir las entidades de usuarios a DTOs y aplicar la visibilidad de columnas
             var userDtos = users.Select(user =>
