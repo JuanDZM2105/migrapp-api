@@ -162,6 +162,27 @@ namespace migrapp_api.Controllers.Admin
             }
         }
 
+        [HttpGet("export-users")]
+        [Authorize]
+        public async Task<IActionResult> ExportUsersToExcel([FromQuery] UserQueryParams queryParams)
+        {
+            try
+            {
+                // Obtener el userId del token JWT
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Llamar al servicio que maneja la exportación a Excel
+                var fileContents = await _adminUserService.ExportUsersToExcelAsync(queryParams, userId);
+
+                // Retornar el archivo Excel como respuesta
+                return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "users.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al exportar los usuarios", details = ex.Message });
+            }
+        }
+
 
     }
 }
