@@ -243,6 +243,52 @@ namespace migrapp_api.Services.Admin
             return userDtos;
         }
 
+        public async Task<UserInfoDto> GetUserInfoAsync(int userId, int currentUserId)
+        {
+            var currentUser = await _userRepository.GetByIdAsync(currentUserId);
+            var userToFetch = await _userRepository.GetByIdAsync(userId);
 
+            if (userToFetch == null) return null; 
+
+            if (currentUser.UserType == "admin")
+            {
+                return MapToUserInfoDto(userToFetch);
+            }
+
+            if (userToFetch.AccountStatus == "eliminated" || userToFetch.AccountStatus == "blocked")
+            {
+                return null; 
+            }
+
+            if (currentUser.HasAccessToAllUsers)
+            {
+                return MapToUserInfoDto(userToFetch);
+            }
+
+            // Verificar si el usuario está asignado a este usuario
+            var assignedUsers = await _assignedUserRepository.GetAssignedUsersAsync(currentUserId);
+
+            if (assignedUsers.Any(a => a.ClientUserId == userId || a.ProfessionalUserId == userId))
+            {
+                return MapToUserInfoDto(userToFetch);
+            }
+
+            return null;
+        }
+
+        private UserInfoDto MapToUserInfoDto(User user)
+        {
+            return new UserInfoDto
+            {
+                Name = user.Name,
+                LastName = user.LastName,
+                Email = user.Email,
+                Country = user.Country,
+                Phone = user.Phone,
+                UserType = user.UserType,
+                AccountStatus = user.AccountStatus,
+                IsActiveNow = user.IsActiveNow,
+            };
+        }
     }
 }

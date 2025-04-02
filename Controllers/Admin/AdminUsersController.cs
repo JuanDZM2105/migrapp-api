@@ -162,6 +162,27 @@ namespace migrapp_api.Controllers.Admin
             }
         }
 
+        [HttpGet("{userId}/info")]
+        [Authorize]
+        public async Task<IActionResult> GetUserInfo(int userId)
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)); 
 
+                var userInfo = await _adminUserService.GetUserInfoAsync(userId, currentUserId);
+
+                if (userInfo == null)
+                {
+                    return NotFound(new { message = "Usuario no disponible." });
+                }
+
+                return Ok(userInfo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener la información del usuario", details = ex.Message });
+            }
+        }
     }
 }
