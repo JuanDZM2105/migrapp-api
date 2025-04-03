@@ -3,6 +3,9 @@ using migrapp_api.Entidades;
 using migrapp_api.Repositories;
 using Microsoft.AspNetCore.Identity;
 using migrapp_api.Helpers.Admin;
+using OfficeOpenXml;
+using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace migrapp_api.Services.Admin
@@ -241,6 +244,76 @@ namespace migrapp_api.Services.Admin
             }).ToList();
 
             return userDtos;
+        }
+
+        public async Task<byte[]> ExportUsersToExcelAsync(UserQueryParams queryParams, int userId)
+        {
+            var columnVisibility = await _columnVisibilityRepository.GetByUserIdAsync(userId);
+
+            if (columnVisibility == null)
+            {
+                columnVisibility = new ColumnVisibility
+                {
+                    UserId = userId,
+                    VisibleColumns = string.Join(",", new List<string> { "name", "email", "country", "phone", "accountStatus", "userType" })
+                };
+            }
+
+            var visibleColumns = columnVisibility.VisibleColumns.Split(',').ToList();
+
+            var users = await _userRepository.GetUsersWithFullInfoAsync(queryParams, userId);
+
+            
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Users");
+
+                // Añadir los encabezados de columna
+                int colIndex = 1;
+                if (visibleColumns.Contains("name"))
+                    worksheet.Cells[1, colIndex++].Value = "Name";
+
+                if (visibleColumns.Contains("email"))
+                    worksheet.Cells[1, colIndex++].Value = "Email";
+
+                if (visibleColumns.Contains("country"))
+                    worksheet.Cells[1, colIndex++].Value = "Country";
+
+                if (visibleColumns.Contains("phone"))
+                    worksheet.Cells[1, colIndex++].Value = "Phone";
+
+                if (visibleColumns.Contains("accountStatus"))
+                    worksheet.Cells[1, colIndex++].Value = "Account Status";
+
+                if (visibleColumns.Contains("userType"))
+                    worksheet.Cells[1, colIndex++].Value = "User Type";
+
+                // Rellenar los datos de usuarios
+                int rowIndex = 2;  // Comienza en la fila 2 (debajo de los encabezados)
+                foreach (var user in users)
+                {
+                    colIndex = 1;
+
+                    if (visibleColumns.Contains("name"))
+                        worksheet.Cells[rowIndex, colIndex++].Value = user.Name;
+                    if (visibleColumns.Contains("email"))
+                        worksheet.Cells[rowIndex, colIndex++].Value = user.Email;
+                    if (visibleColumns.Contains("country"))
+                        worksheet.Cells[rowIndex, colIndex++].Value = user.Country;
+                    if (visibleColumns.Contains("phone"))
+                        worksheet.Cells[rowIndex, colIndex++].Value = user.Phone;
+                    if (visibleColumns.Contains("accountStatus"))
+                        worksheet.Cells[rowIndex, colIndex++].Value = user.AccountStatus;
+                    if (visibleColumns.Contains("userType"))
+                        worksheet.Cells[rowIndex, colIndex++].Value = user.UserType;
+
+                    rowIndex++;
+                }
+
+                // Retornar el archivo Excel como un array de bytes
+                return package.GetAsByteArray();
+            }
+
         }
 
         public async Task<UserInfoDto> GetUserInfoAsync(int userId, int currentUserId)
