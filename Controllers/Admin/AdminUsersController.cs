@@ -205,5 +205,26 @@ namespace migrapp_api.Controllers.Admin
                 return StatusCode(500, new { message = "Ocurrió un error al obtener la información del usuario", details = ex.Message });
             }
         }
+
+        [HttpPatch("{userId}/info/edit")]
+        [Authorize(Roles = "admin")] 
+        public async Task<IActionResult> EditUserInfo(int userId, [FromBody] EditUserInfoDto dto)
+        {
+            try
+            {
+                var result = await _adminUserService.EditUserInfoAsync(userId, dto);
+
+                if (result)
+                {
+                    return Ok(new { message = "Información del usuario actualizada correctamente." });
+                }
+
+                return BadRequest(new { message = "No se pudo actualizar la información del usuario." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al editar la información del usuario", details = ex.Message });
+            }
+        }
     }
 }

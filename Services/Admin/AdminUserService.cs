@@ -363,5 +363,56 @@ namespace migrapp_api.Services.Admin
                 IsActiveNow = user.IsActiveNow,
             };
         }
+
+        public async Task<bool> EditUserInfoAsync(int userId, EditUserInfoDto dto)
+        {
+            var userToEdit = await _userRepository.GetByIdAsync(userId);
+
+            if (userToEdit == null)
+            {
+                return false;
+            }
+
+            switch (dto.Field.ToLower())
+            {
+                case "name":
+                    userToEdit.Name = dto.Value;
+                    break;
+
+                case "lastname":
+                    userToEdit.LastName = dto.Value;
+                    break;
+
+                case "email":
+                    userToEdit.Email = dto.Value;
+                    break;
+
+                case "country":
+                    userToEdit.Country = dto.Value;
+                    break;
+
+                case "phone":
+                    userToEdit.Phone = dto.Value;
+                    break;
+
+                case "phonenumber":
+                    userToEdit.PhonePrefix = dto.Value;
+                    break;
+
+                case "usertype":
+                    userToEdit.UserType = dto.Value;
+                    break;
+
+                case "accountstatus":
+                    userToEdit.AccountStatus = dto.Value;
+                    break;
+
+                default:
+                    return false; // Si el campo no es válido, no se actualiza
+            }
+
+            await _userRepository.SaveChangesAsync();
+            return true;
+        }
     }
 }

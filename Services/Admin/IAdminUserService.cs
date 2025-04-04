@@ -13,6 +13,6 @@ namespace migrapp_api.Services.Admin
         Task<List<UserDto>> GetUsersWithFullInfoAsync(UserQueryParams queryParams, int userId);
         Task<UserInfoDto> GetUserInfoAsync(int userId, int currentUserId);
         Task<byte[]> ExportUsersToExcelAsync(UserQueryParams queryParams, int userId);
-
+        Task<bool> EditUserInfoAsync(int userId, EditUserInfoDto dto);
     }
 }
