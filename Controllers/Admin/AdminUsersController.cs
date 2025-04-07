@@ -16,7 +16,7 @@ namespace migrapp_api.Controllers.Admin
         private readonly IUserRepository _userRepository;
         private readonly IColumnVisibilityService _columnVisibilityService;
 
-        public AdminUsersController(IAdminUserService adminUserService, IUserRepository userRepository, IColumnVisibilityService columnVisibilityService) 
+        public AdminUsersController(IAdminUserService adminUserService, IUserRepository userRepository, IColumnVisibilityService columnVisibilityService)
         {
             _adminUserService = adminUserService;
             _userRepository = userRepository;

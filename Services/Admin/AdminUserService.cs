@@ -129,7 +129,7 @@ namespace migrapp_api.Services.Admin
         {
             var validFields = new List<string> { "accountStatus", "userType" };
 
-            if (!validFields.Contains(dto.Field)) 
+            if (!validFields.Contains(dto.Field))
             {
                 throw new ArgumentException("Campo no válido.");
             }
@@ -156,15 +156,15 @@ namespace migrapp_api.Services.Admin
             {
                 if (dto.Field == "accountStatus")
                 {
-                    user.AccountStatus = dto.Value;  
+                    user.AccountStatus = dto.Value;
                 }
                 else if (dto.Field == "userType")
                 {
-                    user.UserType = dto.Value;  
+                    user.UserType = dto.Value;
                 }
             }
 
-            await _userRepository.SaveChangesAsync();  
+            await _userRepository.SaveChangesAsync();
             return true;
         }
 

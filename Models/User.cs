@@ -42,6 +42,8 @@ namespace migrapp_api.Entidades
         public DateTime LastLogin { get; set; }
         public bool IsActiveNow { get; set; } = false;
 
+        //Relationships
+
         public ICollection<Document> Documents { get; set; }
         public ICollection<LegalProcess> ClientLegalProcesses { get; set; }
         public ICollection<LegalProcess> LawyerLegalProcesses { get; set; }

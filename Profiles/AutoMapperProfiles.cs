@@ -5,7 +5,7 @@ using migrapp_api.Entidades;
 
 namespace migrapp_api.Profiles
 {
-    public class AutoMapperProfiles: Profile
+    public class AutoMapperProfiles : Profile
     {
         public AutoMapperProfiles()
         {

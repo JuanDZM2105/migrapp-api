@@ -32,8 +32,8 @@ public class UserRepository : IUserRepository
     public async Task<List<User>> GetUsersByIdsAsync(List<int> userIds)
     {
         return await _context.Users
-            .Where(u => userIds.Contains(u.UserId))  
-            .ToListAsync();  
+            .Where(u => userIds.Contains(u.UserId))
+            .ToListAsync();
     }
 
     public async Task<List<User>> GetUsersWithFullInfoAsync(UserQueryParams queryParams)
