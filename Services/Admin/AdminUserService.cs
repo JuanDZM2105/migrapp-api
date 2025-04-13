@@ -16,17 +16,20 @@ namespace migrapp_api.Services.Admin
         private readonly IAssignedUserRepository _assignedUserRepository;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IColumnVisibilityRepository _columnVisibilityRepository;
+        private readonly IUserLogRepository _userLogRepository;
 
         public AdminUserService(
             IUserRepository userRepository,
             IAssignedUserRepository assignedUserRepository,
             IPasswordHasher<User> passwordHasher,
-            IColumnVisibilityRepository columnVisibilityRepository)
+            IColumnVisibilityRepository columnVisibilityRepository,
+            IUserLogRepository userLogRepository)
         {
             _userRepository = userRepository;
             _assignedUserRepository = assignedUserRepository;
             _passwordHasher = passwordHasher;
             _columnVisibilityRepository = columnVisibilityRepository;
+            _userLogRepository = userLogRepository;
         }
 
         public async Task<bool> CreateUserAsync(CreateUserByAdminDto dto)
@@ -414,5 +417,54 @@ namespace migrapp_api.Services.Admin
             await _userRepository.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> HasAccessToUserLogs(int currentUserId, int userId)
+        {
+            var currentUser = await _userRepository.GetByIdAsync(currentUserId);
+            var userToFetch = await _userRepository.GetByIdAsync(userId);
+
+            if (currentUser == null || userToFetch == null)
+            {
+                return false;
+            }
+
+            if (currentUser.UserType == "admin")
+            {
+                return true;
+            }
+
+            if (currentUser.HasAccessToAllUsers)
+            {
+                return true;
+            }
+
+            if (userToFetch.AccountStatus == "eliminated" || userToFetch.AccountStatus == "blocked")
+            {
+                return false; 
+            }
+
+            var assignedUsers = await _assignedUserRepository.GetAssignedUsersAsync(currentUserId);
+
+            if (assignedUsers.Any(a => a.ClientUserId == userId || a.ProfessionalUserId == userId))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public async Task<List<UserLogDto>> GetUserLogsAsync(int userId)
+        {
+            var logs = await _userLogRepository.GetUserLogsAsync(userId);
+
+            return logs.Select(log => new UserLogDto
+            {
+                ActionType = log.ActionType,
+                IpAddress = log.IpAddress,
+                Description = log.Description,
+                ActionDate = log.ActionDate
+            }).ToList();
+        }
+
     }
 }

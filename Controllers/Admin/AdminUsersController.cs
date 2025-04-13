@@ -226,5 +226,36 @@ namespace migrapp_api.Controllers.Admin
                 return StatusCode(500, new { message = "Ocurrió un error al editar la información del usuario", details = ex.Message });
             }
         }
+
+        [HttpGet("{userId}/logs")]
+        [Authorize]
+        public async Task<IActionResult> GetUserLogs(int userId)
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Verificar si el usuario tiene acceso a los logs
+                var hasAccess = await _adminUserService.HasAccessToUserLogs(currentUserId, userId);
+                if (!hasAccess)
+                {
+                    return Unauthorized(new { message = "No tiene permiso para ver los logs de este usuario." });
+                }
+
+                var logs = await _adminUserService.GetUserLogsAsync(userId);
+
+                if (logs == null || !logs.Any())
+                {
+                    return NotFound(new { message = "No se encontraron logs para este usuario." });
+                }
+
+                return Ok(logs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener los logs", details = ex.Message });
+            }
+        }
+
     }
 }
