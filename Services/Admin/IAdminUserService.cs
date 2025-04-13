@@ -14,5 +14,7 @@ namespace migrapp_api.Services.Admin
         Task<UserInfoDto> GetUserInfoAsync(int userId, int currentUserId);
         Task<byte[]> ExportUsersToExcelAsync(UserQueryParams queryParams, int userId);
         Task<bool> EditUserInfoAsync(int userId, EditUserInfoDto dto);
+        Task<bool> HasAccessToUserLogs(int currentUserId, int userId);
+        Task<List<UserLogDto>> GetUserLogsAsync(int userId);
     }
 }
