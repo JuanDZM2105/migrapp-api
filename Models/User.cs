@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace migrapp_api.Entidades
+namespace migrapp_api.Models
 {
     public class User
     {
 
         [Key]
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         [Required, MaxLength(100)]
         public string Name { get; set; }
@@ -37,10 +37,13 @@ namespace migrapp_api.Entidades
         public string AccountStatus { get; set; }
 
         [Required, MaxLength(20)]
-        public string UserType { get; set; }
+        public string Type { get; set; }
 
         public DateTime LastLogin { get; set; }
         public bool IsActiveNow { get; set; } = false;
+
+        public string OtpSecretKey { get; set; } = string.Empty;
+
 
         //Relationships
 

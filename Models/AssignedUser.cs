@@ -1,12 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace migrapp_api.Entidades
+namespace migrapp_api.Models
 {
     public class AssignedUser
     {
         [Key]
-        public int AssignedUserId { get; set; }
+        public int Id { get; set; }
 
         // Cliente asignado
         public int ClientUserId { get; set; }

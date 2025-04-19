@@ -1,18 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
-using CosmoHosting.Data;
-using CosmoHosting.Models;
+using migrapp_api.Data;
+using migrapp_api.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Security.Claims;
-using CosmoHosting.Services;
+using migrapp_api.Services.User;
 
 [ApiController]
 [Route("api/otp")]
 public class OtpController : ControllerBase
 {
     private readonly IOtpCode _otpService;
-    private readonly AppDBContext _appDbContext;
-    public OtpController(IOtpCode otpService, AppDBContext appDbContext)
+    private readonly ApplicationDbContext _appDbContext;
+    public OtpController(IOtpCode otpService, ApplicationDbContext appDbContext)
     {
         _otpService = otpService;
         _appDbContext = appDbContext;

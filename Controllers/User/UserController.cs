@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using migrapp_api.Data;
 
 namespace migrapp_api.Controllers.User
 {
@@ -9,9 +10,9 @@ namespace migrapp_api.Controllers.User
     public class UserController : ControllerBase
     {
         private readonly IWebHostEnvironment _env;
-        private readonly ApplicationDBContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public UserController(ApplicationDBContext context, IWebHostEnvironment env)
+        public UserController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
             _env = env;
@@ -57,7 +58,7 @@ namespace migrapp_api.Controllers.User
         {
             var user = await _context.Users
                 .Include(u => u.Documents)
-                .FirstOrDefaultAsync(u => u.UserID == userId);
+                .FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
                 return NotFound("Usuario no encontrado.");
 

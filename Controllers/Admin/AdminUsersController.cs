@@ -37,7 +37,7 @@ namespace migrapp_api.Controllers.Admin
         public async Task<IActionResult> GetAvailableUsers()
         {
             var users = await _userRepository.GetUsersByTypeAsync("user");
-            return Ok(users.Select(u => new { u.UserId, u.Name, u.LastName, u.Email }));
+            return Ok(users.Select(u => new { u.Id, u.Name, u.LastName, u.Email }));
         }
 
         [HttpGet("profile")]

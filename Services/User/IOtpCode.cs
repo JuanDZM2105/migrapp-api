@@ -1,4 +1,4 @@
-namespace CosmoHosting.Services.User
+namespace migrapp_api.Services.User
 {
     public interface IOtpCode
     {

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using CosmoHosting.Data;
-using CosmoHosting.Models;
+using migrapp_api.Data;
+using migrapp_api.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Security.Claims;
@@ -8,21 +8,23 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System;
 using OtpNet;
-using CosmoHosting.Services;
+using migrapp_api.Services.User;
+using UserModel = migrapp_api.Models.User;
 
-namespace CosmoHosting.Controllers.User
+
+namespace migrapp_api.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly AppDBContext _appDbContext;
-        public AuthController(AppDBContext appDbContext)
+        private readonly ApplicationDbContext _appDbContext;
+        public AuthController(ApplicationDbContext appDbContext)
         {
             _appDbContext = appDbContext;
         }
 
         [HttpPost]
         [Route("api/auth/register")]
-        public async Task<IActionResult> Register([FromBody] User model)
+        public async Task<IActionResult> Register([FromBody] UserModel model)
         {
             if (model == null)
                 return BadRequest(new { message = "Datos inválidos" });
@@ -30,10 +32,11 @@ namespace CosmoHosting.Controllers.User
             var secretKey = KeyGeneration.GenerateRandomKey(20);
             var base32SecretKey = Base32Encoding.ToString(secretKey);
 
-            var user = new User()
+            var user = new UserModel()
             {
                 Email = model.Email,
-                PhoneNumber = model.PhoneNumber,
+                PhonePrefix = model.PhonePrefix,
+                Phone = model.Phone,
                 PasswordHash = model.PasswordHash,
                 OtpSecretKey = base32SecretKey
             };
@@ -64,7 +67,7 @@ namespace CosmoHosting.Controllers.User
 
             var claims = new List<Claim>
             {
-            new Claim(ClaimTypes.Name, userFound.FirstName),
+            new Claim(ClaimTypes.Name, userFound.Name),
             new Claim(ClaimTypes.Email, userFound.Email)
             };
 

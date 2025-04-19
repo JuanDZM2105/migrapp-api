@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using migrapp_api.Data;
 using System.Linq;
 
 namespace migrapp_api.Controllers.User
@@ -10,7 +11,7 @@ namespace migrapp_api.Controllers.User
     {
         private readonly ApplicationDbContext _context;
 
-        public HomeController(TuDbContext context)
+        public HomeController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -22,35 +23,39 @@ namespace migrapp_api.Controllers.User
             if (user == null)
                 return NotFound("Usuario no encontrado.");
 
-            var processes = await _context.Processes
-                .Where(p => p.UserID == userId)
+            var processes = await _context.LegalProcesses
+                .Where(p => p.ClientUserId == userId)
                 .Include(p => p.Procedures)
                 .ToListAsync();
 
             var processSummaries = processes.Select(p => new
             {
-                p.ProcessName,
-                p.Status,
+                ProcessType = p.Type,
+                ProcessStatus = p.Status,
+                PaymentStatus = p.PaymentStatus,
+                Cost = p.Cost,
                 StartDate = p.StartDate.ToString("yyyy-MM-dd"),
                 EndDate = p.EndDate?.ToString("yyyy-MM-dd"),
+
                 TotalProcedures = p.Procedures.Count,
                 CompletedProcedures = p.Procedures.Count(proc => proc.Status.ToLower() == "completado"),
+
                 Progress = p.Procedures.Any()
-                    ? (int)(p.Procedures.Count(proc => proc.Status.ToLower() == "completado") * 100.0 / p.Procedures.Count)
-                    : 0
+                ? (int)(p.Procedures.Count(proc => proc.Status.ToLower() == "completado") * 100.0 / p.Procedures.Count)
+                : 0
             });
 
             var alerts = processes
                 .SelectMany(p => p.Procedures)
                 .Where(proc => proc.DueDate < DateTime.Now && proc.Status.ToLower() != "completado")
-                .Select(proc => $"El procedimiento '{proc.ProcedureName}' del proceso '{processes.First(p => p.ProcessID == proc.ProcessID).ProcessName}' está vencido.")
+                .Select(proc => $"El trámite '{proc.Name}' del proceso '{processes.First(p => p.Id == proc.Id).Name}' está vencido.")
                 .ToList();
 
             var homeData = new
             {
                 User = new
                 {
-                    user.FirstName,
+                    user.Name,
                     user.LastName,
                     user.Email
                 },

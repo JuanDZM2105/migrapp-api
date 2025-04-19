@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace migrapp_api.Entidades
+namespace migrapp_api.Models
 {
     public class LegalProcess
     {
         [Key]
-        public int LegalProcessId { get; set; }
+        public int Id { get; set; }
+
+        public string Name { get; set; }
 
         [Required, MaxLength(100)]
-        public string ProcessType { get; set; }
+        public string Type { get; set; }
 
         [Required, MaxLength(20)]
-        public string ProcessStatus { get; set; }
+        public string Status { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal Cost { get; set; }
@@ -33,6 +35,6 @@ namespace migrapp_api.Entidades
         public int? LawyerUserId { get; set; }
         public User LawyerUser { get; set; }
 
-        public ICollection<LegalProcessDocument> RequiredDocuments { get; set; }
+        public ICollection<Procedure> Procedures { get; set; } = new List<Procedure>();
     }
 }

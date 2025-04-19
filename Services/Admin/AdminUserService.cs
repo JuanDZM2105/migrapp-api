@@ -1,8 +1,9 @@
 ﻿using migrapp_api.DTOs.Admin;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 using migrapp_api.Repositories;
 using Microsoft.AspNetCore.Identity;
 using migrapp_api.Helpers.Admin;
+using UserModel = migrapp_api.Models.User;
 
 
 namespace migrapp_api.Services.Admin
@@ -11,13 +12,13 @@ namespace migrapp_api.Services.Admin
     {
         private readonly IUserRepository _userRepository;
         private readonly IAssignedUserRepository _assignedUserRepository;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IPasswordHasher<UserModel> _passwordHasher;
         private readonly IColumnVisibilityRepository _columnVisibilityRepository;
 
         public AdminUserService(
             IUserRepository userRepository,
             IAssignedUserRepository assignedUserRepository,
-            IPasswordHasher<User> passwordHasher,
+            IPasswordHasher<UserModel> passwordHasher,
             IColumnVisibilityRepository columnVisibilityRepository)
         {
             _userRepository = userRepository;
@@ -28,7 +29,7 @@ namespace migrapp_api.Services.Admin
 
         public async Task<bool> CreateUserAsync(CreateUserByAdminDto dto)
         {
-            var newUser = new User
+            var newUser = new UserModel
             {
                 Email = dto.Email,
                 Name = dto.Name,
@@ -38,7 +39,7 @@ namespace migrapp_api.Services.Admin
                 PhonePrefix = dto.PhonePrefix,
                 PasswordHash = _passwordHasher.HashPassword(null, dto.Password),
                 AccountStatus = "active",
-                UserType = dto.UserType,
+                Type = dto.UserType,
                 AccountCreated = DateTime.UtcNow
             };
 
@@ -60,7 +61,7 @@ namespace migrapp_api.Services.Admin
                     var assigned = new AssignedUser
                     {
                         ClientUserId = assignedUserId,
-                        ProfessionalUserId = newUser.UserId,
+                        ProfessionalUserId = newUser.Id,
                         ProfessionalRole = dto.UserType,
                         AssignedAt = DateTime.UtcNow
                     };
@@ -91,7 +92,7 @@ namespace migrapp_api.Services.Admin
                 Country = user.Country,
                 Phone = user.Phone,
                 PhonePrefix = user.PhonePrefix,
-                UserType = user.UserType,
+                UserType = user.Type,
                 AccountStatus = user.AccountStatus,
                 AccountCreated = user.AccountCreated,
                 BirthDate = user.BirthDate,
@@ -160,7 +161,7 @@ namespace migrapp_api.Services.Admin
                 }
                 else if (dto.Field == "userType")
                 {
-                    user.UserType = dto.Value;
+                    user.Type = dto.Value;
                 }
             }
 
@@ -205,7 +206,7 @@ namespace migrapp_api.Services.Admin
                 columnVisibility = new ColumnVisibility
                 {
                     UserId = userId,
-                    VisibleColumns = string.Join(",", new List<string> { "name", "email", "country", "phone", "accountStatus", "userType" })
+                    VisibleColumns = string.Join(",", new List<string> { "name", "email", "country", "phone", "accountStatus", "type" })
                 };
                 await _columnVisibilityRepository.SaveColumnVisibilityAsync(columnVisibility);
             }
@@ -220,7 +221,7 @@ namespace migrapp_api.Services.Admin
             {
                 var userDto = new UserDto
                 {
-                    UserId = user.UserId,
+                    UserId = user.Id,
                     Name = visibleColumns.Contains("name") ? user.Name : null,
                     LastName = visibleColumns.Contains("lastName") ? user.LastName : null,
                     Email = visibleColumns.Contains("email") ? user.Email : null,
@@ -228,7 +229,7 @@ namespace migrapp_api.Services.Admin
                     PhonePrefix = visibleColumns.Contains("phonePrefix") ? user.PhonePrefix : null,
                     Country = visibleColumns.Contains("country") ? user.Country : null,
                     AccountStatus = visibleColumns.Contains("accountStatus") ? user.AccountStatus : null,
-                    UserType = visibleColumns.Contains("userType") ? user.UserType : null,
+                    UserType = visibleColumns.Contains("type") ? user.Type : null,
                     BirthDate = visibleColumns.Contains("birthDate") ? user.BirthDate : null,
                     AccountCreated = visibleColumns.Contains("accountCreated") ? user.AccountCreated : null,
                     LastLogin = visibleColumns.Contains("lastLogin") ? user.LastLogin : null,

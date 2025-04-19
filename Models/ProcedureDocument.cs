@@ -1,14 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace migrapp_api.Entidades
+namespace migrapp_api.Models
 {
-    public class LegalProcessDocument
+    public class ProcedureDocument
     {
         [Key]
-        public int LegalProcessDocumentId { get; set; }
+        public int Id { get; set; }
 
         [Required, MaxLength(100)]
-        public string RequiredDocumentType { get; set; }
+        public string Type { get; set; }
 
         public bool IsUploaded { get; set; } = false;
 
@@ -16,7 +16,7 @@ namespace migrapp_api.Entidades
         public Document Document { get; set; }
 
         // Relationships
-        public int LegalProcessId { get; set; }
-        public LegalProcess LegalProcess { get; set; }
+        public int ProcedureId { get; set; }
+        public Procedure Procedure { get; set; }
     }
 }

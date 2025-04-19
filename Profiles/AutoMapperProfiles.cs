@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using migrapp_api.DTOs.Admin;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 
 
 namespace migrapp_api.Profiles

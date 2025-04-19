@@ -1,4 +1,4 @@
-﻿using migrapp_api.Entidades;
+﻿using migrapp_api.Models;
 using Microsoft.EntityFrameworkCore;
 using migrapp_api.Data;
 

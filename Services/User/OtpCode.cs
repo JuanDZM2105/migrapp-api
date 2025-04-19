@@ -1,7 +1,7 @@
 using OtpNet;
 using System;
 
-namespace CosmoHosting.Services.User
+namespace migrapp_api.Services.User
 {
     public class OtpService : IOtpCode
     {

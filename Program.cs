@@ -7,7 +7,7 @@ using FluentValidation;
 using migrapp_api.Validators.Admin;
 using migrapp_api.Validators.Admin;
 using Microsoft.AspNetCore.Identity;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 using migrapp_api.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
