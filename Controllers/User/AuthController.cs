@@ -14,6 +14,8 @@ using UserModel = migrapp_api.Models.User;
 
 namespace migrapp_api.Controllers
 {
+    [ApiController]
+    [Route("api/auth")]
     public class AuthController : Controller
     {
         private readonly ApplicationDbContext _appDbContext;
@@ -22,8 +24,7 @@ namespace migrapp_api.Controllers
             _appDbContext = appDbContext;
         }
 
-        [HttpPost]
-        [Route("api/auth/register")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserModel model)
         {
             if (model == null)
@@ -52,8 +53,7 @@ namespace migrapp_api.Controllers
             return BadRequest(new { message = "No se pudo crear el usuario" });
         }
 
-        [HttpPost]
-        [Route("api/auth/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] PassWordLogin model)
         {
             if (model == null)

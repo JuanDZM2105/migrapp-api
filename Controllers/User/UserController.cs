@@ -19,7 +19,7 @@ namespace migrapp_api.Controllers.User
         }
 
         [HttpGet("{userId}/profile")]
-        public async Task<IActionResult> index(int userId)
+        public async Task<IActionResult> Index(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
@@ -34,7 +34,7 @@ namespace migrapp_api.Controllers.User
         }
 
         [HttpGet("{userId}/information")]
-        public async Task<IActionResult> read(int userId)
+        public async Task<IActionResult> Read(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
