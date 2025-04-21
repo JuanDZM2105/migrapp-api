@@ -18,7 +18,7 @@ namespace migrapp_api.Data
         public DbSet<AssignedUser> AssignedUsers { get; set; }
         public DbSet<UserLog> UserLogs { get; set; }
         public DbSet<UserMfaCode> UserMfaCodes { get; set; }
-        public DbSet<ColumnVisibility> ColumnVisibilities { get; set; } 
+        public DbSet<ColumnVisibility> ColumnVisibilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -77,12 +77,12 @@ namespace migrapp_api.Controllers
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var properties = new AuthenticationProperties
-            { 
+            {
                 AllowRefresh = true,
                 IsPersistent = model.RememberMe,
                 ExpiresUtc = model.RememberMe
-                    ? DateTimeOffset.UtcNow.AddDays(30) 
-                    : DateTimeOffset.UtcNow.AddHours(1) 
+                    ? DateTimeOffset.UtcNow.AddDays(30)
+                    : DateTimeOffset.UtcNow.AddHours(1)
             };
 
             await HttpContext.SignInAsync(

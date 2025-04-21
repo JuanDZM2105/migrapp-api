@@ -28,6 +28,7 @@ namespace migrapp_api.Seeding
                 .RuleFor(u => u.LastLogin, f => f.Date.Recent(30))
                 .RuleFor(u => u.IsActiveNow, f => f.Random.Bool())
                 .RuleFor(u => u.OtpSecretKey, f => f.Random.AlphaNumeric(6))
+                .RuleFor(u => u.HasAccessToAllUsers, f => f.Random.Bool()) // Nueva propiedad HasAccessToAllUsers
                 .RuleFor(u => u.Documents, _ => new List<Document>())
                 .RuleFor(u => u.ClientLegalProcesses, _ => new List<LegalProcess>())
                 .RuleFor(u => u.LawyerLegalProcesses, _ => new List<LegalProcess>())
@@ -89,7 +90,7 @@ namespace migrapp_api.Seeding
             foreach (var process in legalProcesses)
             {
                 int numProcedures = faker.Random.Int(1, 4);
-                for (int i = 0; i< numProcedures; i++)
+                for (int i = 0; i < numProcedures; i++)
                 {
                     procedures.Add(new Procedure
                     {

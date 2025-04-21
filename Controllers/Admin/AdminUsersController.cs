@@ -9,7 +9,7 @@ namespace migrapp_api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/users")]
-    [Authorize(Roles = "admin")]
+
     public class AdminUsersController : ControllerBase
     {
         private readonly IAdminUserService _adminUserService;
@@ -151,7 +151,7 @@ namespace migrapp_api.Controllers.Admin
 
                 if (users == null || !users.Any())
                 {
-                    return NotFound(new { message = "No se encontraron usuarios." });
+                    return NotFound(new { message = "No se encontraron usuarios. 1" });
                 }
 
                 return Ok(users);
@@ -162,6 +162,100 @@ namespace migrapp_api.Controllers.Admin
             }
         }
 
+        [HttpGet("export-users")]
+        [Authorize]
+        public async Task<IActionResult> ExportUsersToExcel([FromQuery] UserQueryParams queryParams)
+        {
+            try
+            {
+                // Obtener el userId del token JWT
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Llamar al servicio que maneja la exportación a Excel
+                var fileContents = await _adminUserService.ExportUsersToExcelAsync(queryParams, userId);
+
+                // Retornar el archivo Excel como respuesta
+                return File(fileContents, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "users.xlsx");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al exportar los usuarios", details = ex.Message });
+            }
+        }
+
+        [HttpGet("{userId}/info")]
+        [Authorize]
+        public async Task<IActionResult> GetUserInfo(int userId)
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                var userInfo = await _adminUserService.GetUserInfoAsync(userId, currentUserId);
+
+                if (userInfo == null)
+                {
+                    return NotFound(new { message = "Usuario no disponible." });
+                }
+
+                return Ok(userInfo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener la información del usuario", details = ex.Message });
+            }
+        }
+
+        [HttpPatch("{userId}/info/edit")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> EditUserInfo(int userId, [FromBody] EditUserInfoDto dto)
+        {
+            try
+            {
+                var result = await _adminUserService.EditUserInfoAsync(userId, dto);
+
+                if (result)
+                {
+                    return Ok(new { message = "Información del usuario actualizada correctamente." });
+                }
+
+                return BadRequest(new { message = "No se pudo actualizar la información del usuario." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al editar la información del usuario", details = ex.Message });
+            }
+        }
+
+        [HttpGet("{userId}/logs")]
+        [Authorize]
+        public async Task<IActionResult> GetUserLogs(int userId)
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Verificar si el usuario tiene acceso a los logs
+                var hasAccess = await _adminUserService.HasAccessToUserLogs(currentUserId, userId);
+                if (!hasAccess)
+                {
+                    return Unauthorized(new { message = "No tiene permiso para ver los logs de este usuario." });
+                }
+
+                var logs = await _adminUserService.GetUserLogsAsync(userId);
+
+                if (logs == null || !logs.Any())
+                {
+                    return NotFound(new { message = "No se encontraron logs para este usuario." });
+                }
+
+                return Ok(logs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener los logs", details = ex.Message });
+            }
+        }
 
     }
 }

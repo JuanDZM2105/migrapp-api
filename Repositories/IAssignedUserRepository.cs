@@ -6,5 +6,6 @@ namespace migrapp_api.Repositories
     {
         Task AddAsync(AssignedUser assignedUser);
         Task SaveChangesAsync();
+        Task<List<AssignedUser>> GetAssignedUsersAsync(int userId);
     }
 }

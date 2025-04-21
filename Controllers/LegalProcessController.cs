@@ -15,7 +15,7 @@ namespace migrapp_api.Controllers
 
         public LegalProcessController(ApplicationDbContext context)
         {
-                _context = context;    
+            _context = context;
         }
 
         [HttpGet("user/{userId}")]
@@ -105,4 +105,3 @@ namespace migrapp_api.Controllers
         }
     }
 }
-  

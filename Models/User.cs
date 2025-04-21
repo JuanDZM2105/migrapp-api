@@ -46,7 +46,7 @@ namespace migrapp_api.Models
 
         public string OtpSecretKey { get; set; } = string.Empty;
 
-
+        public bool HasAccessToAllUsers { get; set; } = false;
         //Relationships
 
         public ICollection<Document> Documents { get; set; }

@@ -36,9 +36,26 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
-    public async Task<List<User>> GetUsersWithFullInfoAsync(UserQueryParams queryParams)
+    public async Task<List<User>> GetUsersWithFullInfoAsync(UserQueryParams queryParams, int userId)
     {
+
+        var currentUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (currentUser == null)
+        {
+            // Si el usuario no existe, lanzar una excepción o devolver una respuesta adecuada
+            throw new Exception("Usuario no encontrado");
+        }
+
+
         var query = _context.Users.AsQueryable();
+
+        if (!currentUser.Type.Equals("admin") && !currentUser.HasAccessToAllUsers)
+        {
+            query = query.Where(u => u.AssignedProfessionals.Any(a => a.ProfessionalUserId == userId));
+
+        }
 
         // Filtrar por nombre si se proporciona
         if (!string.IsNullOrEmpty(queryParams.Name))
@@ -90,5 +107,11 @@ public class UserRepository : IUserRepository
         return users;
     }
 
+    public async Task<List<AssignedUser>> GetAssignedUsersAsync(int userId)
+    {
+        return await _context.Set<AssignedUser>()
+            .Where(a => a.ProfessionalUserId == userId || a.ClientUserId == userId)
+            .ToListAsync();
+    }
 }
 

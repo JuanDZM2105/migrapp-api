@@ -44,6 +44,8 @@ builder.Services.AddSingleton<IEmailHelper, EmailHelper>();
 builder.Services.AddSingleton<ISmsHelper, SmsHelper>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
+builder.Services.AddScoped<IUserLogRepository, UserLogRepository>();
+
 
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserByAdminDtoValidator>();

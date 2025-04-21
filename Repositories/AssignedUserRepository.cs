@@ -22,5 +22,12 @@ namespace migrapp_api.Repositories
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<AssignedUser>> GetAssignedUsersAsync(int userId)
+        {
+            return await _context.Set<AssignedUser>()
+                .Where(a => a.ProfessionalUserId == userId || a.ClientUserId == userId)
+                .ToListAsync();
+        }
     }
 }

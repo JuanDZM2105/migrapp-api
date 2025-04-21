@@ -11,6 +11,10 @@ namespace migrapp_api.Services.Admin
         Task<bool> BulkEditUsersAsync(BulkEditDto dto);
         Task<bool> UpdateUserProfileAsync(int UserId, UpdateProfileDto dto);
         Task<List<UserDto>> GetUsersWithFullInfoAsync(UserQueryParams queryParams, int userId);
-
+        Task<UserInfoDto> GetUserInfoAsync(int userId, int currentUserId);
+        Task<byte[]> ExportUsersToExcelAsync(UserQueryParams queryParams, int userId);
+        Task<bool> EditUserInfoAsync(int userId, EditUserInfoDto dto);
+        Task<bool> HasAccessToUserLogs(int currentUserId, int userId);
+        Task<List<UserLogDto>> GetUserLogsAsync(int userId);
     }
 }
