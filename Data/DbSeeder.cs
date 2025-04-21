@@ -47,6 +47,7 @@ namespace migrapp_api.Seeding
 
             // DOCUMENTS
             var documents = new Faker<Document>()
+                .RuleFor(d => d.Name, f => f.PickRandom("ID Card", "Driver License", "Contract", "Proof of Residence", "Court Notice", "Medical Certificate", "Birth Certificate"))
                 .RuleFor(d => d.Type, f => f.PickRandom("ID Card", "Driver License", "Contract", "Proof of Residence", "Court Notice", "Medical Certificate", "Birth Certificate"))
                 .RuleFor(d => d.FilePath, f => $"/docs/user_{f.Random.Number(1, 50)}/{f.System.FileName("pdf")}")
                 .RuleFor(d => d.UploadedAt, f => f.Date.Past(1))

@@ -15,6 +15,8 @@ namespace migrapp_api.Models
 
         public string LastName { get; set; }
 
+        public string? ImageUrl { get; set; }
+
         [Required, MaxLength(150)]
         public string Email { get; set; }
 

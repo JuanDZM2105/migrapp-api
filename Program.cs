@@ -25,7 +25,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddDbContext<ApplicationDbContext>(opciones =>
-    opciones.UseSqlServer("name=DefaultConnection"));
+    opciones.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddOutputCache(opciones =>
 {

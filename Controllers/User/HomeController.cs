@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using migrapp_api.Data;
@@ -7,6 +8,7 @@ namespace migrapp_api.Controllers.User
 {
     [ApiController]
     [Route("api/user/home")]
+    [Authorize]
     public class HomeController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

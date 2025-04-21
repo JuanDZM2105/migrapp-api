@@ -2,11 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using migrapp_api.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace migrapp_api.Controllers
 {
     [ApiController]
     [Route("api/legalProcess")]
+    [Authorize]
     public class LegalProcessController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -17,14 +19,33 @@ namespace migrapp_api.Controllers
         }
 
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> Index(int userId)
+        public async Task<IActionResult> Index(
+            int userId,
+            [FromQuery] string? status,
+            [FromQuery] string? type,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate)
         {
-            var legalProcesess = await _context.LegalProcesses
+            var query = _context.LegalProcesses
                 .Include(lp => lp.Procedures)
                 .Where(lp => lp.ClientUserId == userId)
-                .ToListAsync();
+                .AsQueryable();
 
-            var result = legalProcesess.Select(lp => new
+            if (!string.IsNullOrWhiteSpace(status))
+                query = query.Where(lp => lp.Status.ToLower() == status.ToLower());
+
+            if (!string.IsNullOrWhiteSpace(type))
+                query = query.Where(lp => lp.Type.ToLower() == type.ToLower());
+
+            if (startDate.HasValue)
+                query = query.Where(lp => lp.StartDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(lp => lp.StartDate <= endDate.Value);
+
+            var legalProcesses = await query.ToListAsync();
+
+            var result = legalProcesses.Select(lp => new
             {
                 LegalProcessId = lp.Id,
                 lp.Type,

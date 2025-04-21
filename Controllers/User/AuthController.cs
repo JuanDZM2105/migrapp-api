@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using migrapp_api.Data;
+using migrapp_api.DTOs.Auth;
 using migrapp_api.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace migrapp_api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserModel model)
+        public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
             if (model == null)
                 return BadRequest(new { message = "Datos inválidos" });
@@ -65,6 +66,9 @@ namespace migrapp_api.Controllers
             if (userFound == null)
                 return Unauthorized(new { message = "Credenciales incorrectas" });
 
+            if (!userFound.IsActiveNow)
+                return Unauthorized(new { message = "Tu cuenta está desactivada. Solicita reactivación para continuar." });
+
             var claims = new List<Claim>
             {
             new Claim(ClaimTypes.Name, userFound.Name),
@@ -72,7 +76,14 @@ namespace migrapp_api.Controllers
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var properties = new AuthenticationProperties { AllowRefresh = true };
+            var properties = new AuthenticationProperties
+            { 
+                AllowRefresh = true,
+                IsPersistent = model.RememberMe,
+                ExpiresUtc = model.RememberMe
+                    ? DateTimeOffset.UtcNow.AddDays(30) 
+                    : DateTimeOffset.UtcNow.AddHours(1) 
+            };
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
@@ -87,6 +98,8 @@ namespace migrapp_api.Controllers
         {
             public required string Email { get; set; }       // Email del usuario
             public required string PasswordHash { get; set; } // Hash de la contraseña
+
+            public bool RememberMe { get; set; } = false;
         }
 
     }
