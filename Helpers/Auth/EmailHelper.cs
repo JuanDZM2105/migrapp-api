@@ -7,15 +7,41 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using migrapp_api.Models;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace migrapp_api.Helpers
 {
     public class EmailHelper : IEmailHelper
     {
-        public Task SendEmailAsync(string to, string subject, string body)
+        private readonly string _sendGridApiKey = "apikey";
+        public async Task SendEmailAsync(string to, string subject, string body)
         {
-            Console.WriteLine($"[EMAIL] To: {to} | Subject: {subject} | Body: {body}");
-            return Task.CompletedTask;
+            var client = new SendGridClient(_sendGridApiKey);
+            var from = new EmailAddress("juandzm2105@gmail.com", "Tu App");
+            var toEmail = new EmailAddress(to);
+            string emailBody = $@"
+                <html>
+                    <body>
+                        <div style='text-align: center; font-family: Arial, sans-serif;'>
+                            <h2 style='font-size: 20px;'>Hola</h2>
+                            <p style='font-size: 16px;'>Tu código de verificación de MigrApp es:</p>
+                            <h3 style='font-size: 48px; font-weight: bold; color: #0D47A1; margin-top: 20px;'>
+                                {body}
+                            </h3> <!-- Código de verificación grande y separado -->
+                            <p style='font-size: 16px; margin-top: 30px;'>
+                                Para continuar con tu inicio de sesión, regresa a la aplicación e ingresa el código de verificación.
+                                Este código expirará en 5 minutos.
+                            </p>
+                        </div>
+                    </body>
+                </html>
+                ";
+            var msg = MailHelper.CreateSingleEmail(from, toEmail, subject, "", emailBody);
+
+            var response = await client.SendEmailAsync(msg);
+
+            Console.WriteLine($" Message: {body}");
         }
     }
 
@@ -62,3 +88,4 @@ namespace migrapp_api.Helpers
         }
     }
 }
+
