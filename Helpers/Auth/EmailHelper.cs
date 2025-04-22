@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 
 namespace migrapp_api.Helpers
 {

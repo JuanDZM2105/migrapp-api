@@ -1,22 +1,24 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace migrapp_api.Entidades
+namespace migrapp_api.Models
 {
     public class Document
     {
         [Key]
-        public int DocumentId { get; set; }
+        public int Id { get; set; }
+
+        public string Name { get; set; }
 
         [Required, MaxLength(100)]
-        public string DocumentType { get; set; }
+        public string Type { get; set; }
 
         [Required]
         public string FilePath { get; set; }
 
         public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
 
-        // Relaciones
+        // Relationships
         public int UserId { get; set; }
         public User User { get; set; }
     }

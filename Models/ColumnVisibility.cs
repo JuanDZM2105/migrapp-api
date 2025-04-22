@@ -1,4 +1,4 @@
-﻿namespace migrapp_api.Entidades
+﻿namespace migrapp_api.Models
 {
     public class ColumnVisibility
     {

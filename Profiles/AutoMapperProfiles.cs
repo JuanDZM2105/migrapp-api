@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using migrapp_api.DTOs.Admin;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 
 
 namespace migrapp_api.Profiles
 {
-    public class AutoMapperProfiles: Profile
+    public class AutoMapperProfiles : Profile
     {
         public AutoMapperProfiles()
         {

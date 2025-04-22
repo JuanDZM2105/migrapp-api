@@ -9,14 +9,14 @@ namespace migrapp_api.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/users")]
-    
+
     public class AdminUsersController : ControllerBase
     {
         private readonly IAdminUserService _adminUserService;
         private readonly IUserRepository _userRepository;
         private readonly IColumnVisibilityService _columnVisibilityService;
 
-        public AdminUsersController(IAdminUserService adminUserService, IUserRepository userRepository, IColumnVisibilityService columnVisibilityService) 
+        public AdminUsersController(IAdminUserService adminUserService, IUserRepository userRepository, IColumnVisibilityService columnVisibilityService)
         {
             _adminUserService = adminUserService;
             _userRepository = userRepository;
@@ -37,7 +37,7 @@ namespace migrapp_api.Controllers.Admin
         public async Task<IActionResult> GetAvailableUsers()
         {
             var users = await _userRepository.GetUsersByTypeAsync("user");
-            return Ok(users.Select(u => new { u.UserId, u.Name, u.LastName, u.Email }));
+            return Ok(users.Select(u => new { u.Id, u.Name, u.LastName, u.Email }));
         }
 
         [HttpGet("profile")]
@@ -189,7 +189,7 @@ namespace migrapp_api.Controllers.Admin
         {
             try
             {
-                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)); 
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
                 var userInfo = await _adminUserService.GetUserInfoAsync(userId, currentUserId);
 
@@ -207,7 +207,7 @@ namespace migrapp_api.Controllers.Admin
         }
 
         [HttpPatch("{userId}/info/edit")]
-        [Authorize(Roles = "admin")] 
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> EditUserInfo(int userId, [FromBody] EditUserInfoDto dto)
         {
             try

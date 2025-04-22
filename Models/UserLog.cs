@@ -1,13 +1,13 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace migrapp_api.Entidades
+namespace migrapp_api.Models
 {
     public class UserLog
     {
 
         [Key]
-        public int UserLogId { get; set; }
+        public int Id { get; set; }
 
         public int UserId { get; set; }
         public User User { get; set; }

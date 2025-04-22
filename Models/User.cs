@@ -2,18 +2,20 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace migrapp_api.Entidades
+namespace migrapp_api.Models
 {
     public class User
     {
 
         [Key]
-        public int UserId { get; set; }
+        public int Id { get; set; }
 
         [Required, MaxLength(100)]
         public string Name { get; set; }
 
         public string LastName { get; set; }
+
+        public string? ImageUrl { get; set; }
 
         [Required, MaxLength(150)]
         public string Email { get; set; }
@@ -37,12 +39,15 @@ namespace migrapp_api.Entidades
         public string AccountStatus { get; set; }
 
         [Required, MaxLength(20)]
-        public string UserType { get; set; }
+        public string Type { get; set; }
 
         public DateTime LastLogin { get; set; }
         public bool IsActiveNow { get; set; } = false;
 
+        public string OtpSecretKey { get; set; } = string.Empty;
+
         public bool HasAccessToAllUsers { get; set; } = false;
+        //Relationships
 
         public ICollection<Document> Documents { get; set; }
         public ICollection<LegalProcess> ClientLegalProcesses { get; set; }

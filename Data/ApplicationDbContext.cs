@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 
 namespace migrapp_api.Data
 {
@@ -13,11 +13,12 @@ namespace migrapp_api.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Document> Documents { get; set; }
         public DbSet<LegalProcess> LegalProcesses { get; set; }
-        public DbSet<LegalProcessDocument> LegalProcessDocuments { get; set; }
+        public DbSet<Procedure> Procedures { get; set; }
+        public DbSet<ProcedureDocument> ProcedureDocuments { get; set; }
         public DbSet<AssignedUser> AssignedUsers { get; set; }
         public DbSet<UserLog> UserLogs { get; set; }
         public DbSet<UserMfaCode> UserMfaCodes { get; set; }
-        public DbSet<ColumnVisibility> ColumnVisibilities { get; set; } // Aquí agregamos el DbSet de ColumnVisibility
+        public DbSet<ColumnVisibility> ColumnVisibilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,16 +40,28 @@ namespace migrapp_api.Data
                 .HasForeignKey(lp => lp.LawyerUserId)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            modelBuilder.Entity<LegalProcess>()
+                .HasMany(lp => lp.Procedures)
+                .WithOne(p => p.LegalProcess)
+                .HasForeignKey(p => p.LegalProcessId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Procedure>()
+                .HasMany(p => p.ProcedureDocuments)
+                .WithOne(pd => pd.Procedure)
+                .HasForeignKey(pd => pd.ProcedureId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Document>()
                 .HasOne(d => d.User)
                 .WithMany(u => u.Documents)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<LegalProcessDocument>()
-                .HasOne(lpd => lpd.LegalProcess)
-                .WithMany(lp => lp.RequiredDocuments)
-                .HasForeignKey(lpd => lpd.LegalProcessId)
+            modelBuilder.Entity<ProcedureDocument>()
+                .HasOne(pd => pd.Procedure)
+                .WithMany(p => p.ProcedureDocuments)
+                .HasForeignKey(pd => pd.ProcedureId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<AssignedUser>()
