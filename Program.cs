@@ -32,6 +32,9 @@ builder.Services.AddOutputCache(opciones =>
     opciones.DefaultExpirationTimeSpan = TimeSpan.FromSeconds(30);
 });
 
+builder.Services.Configure<UploadSettings>(
+    builder.Configuration.GetSection("UploadSettings"));
+
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -45,7 +48,7 @@ builder.Services.AddSingleton<ISmsHelper, SmsHelper>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
 builder.Services.AddScoped<IUserLogRepository, UserLogRepository>();
-
+builder.Services.AddScoped<IProcedureDocumentService, ProcedureDocumentService>();
 
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserByAdminDtoValidator>();
@@ -116,6 +119,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+var uploadOpts = app.Services.GetRequiredService<IOptions<UploadSettings>>().Value;
+Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, uploadOpts.StoragePath));
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -131,6 +137,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions {
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(app.Environment.ContentRootPath, uploadOpts.StoragePath)
+    ),
+    RequestPath = "/uploads"
+});
 
 app.UseCors();
 
