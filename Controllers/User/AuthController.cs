@@ -3,13 +3,7 @@ using migrapp_api.Data;
 using migrapp_api.DTOs.Auth;
 using migrapp_api.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System;
 using OtpNet;
-using migrapp_api.Services.User;
 using UserModel = migrapp_api.Models.User;
 
 
@@ -31,7 +25,7 @@ namespace migrapp_api.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
             if (model == null)
-                return BadRequest(new { message = "Datos inválidos" });
+                return BadRequest(new { message = "Datos invï¿½lidos" });
 
             var secretKey = KeyGeneration.GenerateRandomKey(20);
             var base32SecretKey = Base32Encoding.ToString(secretKey);
@@ -81,19 +75,26 @@ namespace migrapp_api.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Usuario no encontrado" });
 
+
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                return Unauthorized(new { message = "Credenciales inválidas" });
+                return Unauthorized(new { message = "Credenciales invï¿½lidas" });
 
-            await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);    
+            var trustedResult = await _loginService.VerifyTrustedDevice(HttpContext, user, dto.RememberMe);
+            if (trustedResult.DeviceIsTrusted)
+                return Ok(trustedResult);
 
-            return Ok(new { message = "Código de verificación enviado" });
+            await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);
+
+            return Ok(new { message = "Cï¿½digo de verificaciï¿½n enviado" });
         }
 
         [HttpPost("verify-mfa")]
         public async Task<IActionResult> VerifyCode([FromBody] VerifyMfaDto dto)
         {
             var result = await _loginService.VerifyCodeAndGenerateTokenAsync(dto.Email, dto.Code, dto.RememberMe);
-            if (result == null) return Unauthorized(new { message = "Código incorrecto o expirado" });
+            if (result == null) return Unauthorized(new { message = "Cï¿½digo incorrecto o expirado" });
+
+            await _loginService.CreateTrustedDevice(HttpContext, dto.Email, dto.RememberMe);
 
             return Ok(result);
         }

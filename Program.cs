@@ -16,6 +16,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 using migrapp_api.Services.HelpCenter;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
