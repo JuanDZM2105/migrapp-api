@@ -6,6 +6,8 @@
         public string Password { get; set; }
         public string PreferredMfaMethod { get; set; } // "email" o "sms"
 
+        public bool RememberMe { get; set; } = false;
+
     }
 
     public class VerifyMfaDto
@@ -21,5 +23,7 @@
         public string Token { get; set; }
         public string Email { get; set; }
         public string UserType { get; set; }
+
+        public bool DeviceIsTrusted { get; set; }
     }
 }

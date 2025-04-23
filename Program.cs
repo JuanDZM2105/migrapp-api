@@ -13,6 +13,7 @@ using migrapp_api.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using migrapp_api.Helpers.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -48,6 +49,7 @@ builder.Services.AddScoped<IAssignedUserRepository, AssignedUserRepository>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IMfaCodeRepository, MfaCodeRepository>();
 builder.Services.AddSingleton<IEmailHelper, EmailHelper>();
+builder.Services.AddSingleton<IDeviceHelper, DeviceHelper>();
 builder.Services.AddSingleton<ISmsHelper, SmsHelper>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();

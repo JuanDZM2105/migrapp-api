@@ -3,13 +3,7 @@ using migrapp_api.Data;
 using migrapp_api.DTOs.Auth;
 using migrapp_api.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System;
 using OtpNet;
-using migrapp_api.Services.User;
 using UserModel = migrapp_api.Models.User;
 
 
@@ -21,10 +15,12 @@ namespace migrapp_api.Controllers
     {
         private readonly ApplicationDbContext _appDbContext;
         private readonly ILoginService _loginService;
+
         public AuthController(ApplicationDbContext appDbContext, ILoginService loginService)
         {
             _appDbContext = appDbContext;
             _loginService = loginService;
+
         }
 
         [HttpPost("register")]
@@ -84,7 +80,13 @@ namespace migrapp_api.Controllers
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 return Unauthorized(new { message = "Credenciales inválidas" });
 
-            await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);    
+            var trustedResult = await _loginService.VerifyTrustedDevice(HttpContext, user, dto.RememberMe);
+            if (trustedResult != null && trustedResult.DeviceIsTrusted)
+            {
+                return Ok(trustedResult);
+            }
+
+            await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);
 
             return Ok(new { message = "Código de verificación enviado" });
         }
@@ -94,6 +96,8 @@ namespace migrapp_api.Controllers
         {
             var result = await _loginService.VerifyCodeAndGenerateTokenAsync(dto.Email, dto.Code, dto.RememberMe);
             if (result == null) return Unauthorized(new { message = "Código incorrecto o expirado" });
+
+            await _loginService.CreateTrustedDevice(HttpContext, dto.Email, dto.RememberMe);
 
             return Ok(result);
         }
