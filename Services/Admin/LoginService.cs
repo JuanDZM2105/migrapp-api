@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using migrapp_api.DTOs.Auth;
 using migrapp_api.Entidades;
 using migrapp_api.Helpers;
+using migrapp_api.Helpers.Admin;
 using migrapp_api.Repositories;
+using migrapp_api.Services.Admin;
 using System.Security.Cryptography;
 
 public class LoginService : ILoginService
@@ -12,18 +15,24 @@ public class LoginService : ILoginService
     private readonly ISmsHelper _smsHelper;
     private readonly IMfaCodeRepository _mfaCodeRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly ILogService _logService;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public LoginService(IUserRepository userRepository,
                         IEmailHelper emailHelper,
                         ISmsHelper smsHelper,
                         IMfaCodeRepository mfaCodeRepository,
-                        IJwtTokenGenerator jwtTokenGenerator)
+                        IJwtTokenGenerator jwtTokenGenerator,
+                        ILogService logService,
+                        IHttpContextAccessor httpContextAccessor)
     {
         _userRepository = userRepository;
         _emailHelper = emailHelper;
         _smsHelper = smsHelper;
         _mfaCodeRepository = mfaCodeRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _logService = logService;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<bool> ValidateUserCredentialsAsync(LoginDto dto)
@@ -78,6 +87,30 @@ public class LoginService : ILoginService
         if (user == null) return null;
 
         var token = _jwtTokenGenerator.GenerateToken(user.Email, user.UserType, user.UserId);
+
+        string ipAddress = "123.123.123.123";
+
+        if (_logService == null)
+        {
+            throw new Exception("LogService no ha sido inyectado correctamente.");
+        }
+
+        if (user == null)
+        {
+            throw new Exception("El usuario no está disponible.");
+        }
+
+        if (string.IsNullOrEmpty(ipAddress))
+        {
+            throw new Exception("La dirección IP es nula o vacía.");
+        }
+
+
+        await _logService.LogActionAsync(
+            user.UserId,
+            LogActionTypes.Login,
+            "Inicio de sesión exitoso",
+            ipAddress);
 
         return new AuthResponseDto
         {

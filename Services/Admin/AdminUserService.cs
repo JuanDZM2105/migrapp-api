@@ -17,19 +17,25 @@ namespace migrapp_api.Services.Admin
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly IColumnVisibilityRepository _columnVisibilityRepository;
         private readonly IUserLogRepository _userLogRepository;
+        private readonly ILogService _logService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AdminUserService(
             IUserRepository userRepository,
             IAssignedUserRepository assignedUserRepository,
             IPasswordHasher<User> passwordHasher,
             IColumnVisibilityRepository columnVisibilityRepository,
-            IUserLogRepository userLogRepository)
+            IUserLogRepository userLogRepository,
+            ILogService logService,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userRepository = userRepository;
             _assignedUserRepository = assignedUserRepository;
             _passwordHasher = passwordHasher;
             _columnVisibilityRepository = columnVisibilityRepository;
             _userLogRepository = userLogRepository;
+            _logService = logService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> CreateUserAsync(CreateUserByAdminDto dto)
@@ -76,6 +82,14 @@ namespace migrapp_api.Services.Admin
 
                 await _assignedUserRepository.SaveChangesAsync();
             }
+
+            string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            await _logService.LogActionAsync(
+                newUser.UserId,
+                LogActionTypes.Create,
+                $"Usuario creado: {newUser.Email}, Tipo: {newUser.UserType}",
+                ipAddress);
 
             return true;
         }
@@ -172,7 +186,19 @@ namespace migrapp_api.Services.Admin
                 }
             }
 
-            await _userRepository.SaveChangesAsync();  
+            await _userRepository.SaveChangesAsync();
+
+            string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            foreach (var userId in dto.UserIds)
+            {
+                await _logService.LogActionAsync(
+                    userId,
+                    LogActionTypes.Update,
+                    $"Campo modificado en edición masiva: {dto.Field} = {dto.Value}",
+                    ipAddress);
+            }
+
             return true;
         }
 
@@ -376,45 +402,65 @@ namespace migrapp_api.Services.Admin
                 return false;
             }
 
+            string actionDescription = $"Campo {dto.Field} actualizado: ";
+
             switch (dto.Field.ToLower())
             {
                 case "name":
+                    actionDescription += $"nombre: {userToEdit.Name} -> {dto.Value}";
                     userToEdit.Name = dto.Value;
                     break;
 
                 case "lastname":
+                    actionDescription += $"apellido: {userToEdit.LastName} -> {dto.Value}";
                     userToEdit.LastName = dto.Value;
                     break;
 
                 case "email":
+                    actionDescription += $"correo: {userToEdit.Email} -> {dto.Value}";
                     userToEdit.Email = dto.Value;
                     break;
 
                 case "country":
+                    actionDescription += $"país: {userToEdit.Country} -> {dto.Value}";
                     userToEdit.Country = dto.Value;
                     break;
 
                 case "phone":
+                    actionDescription += $"teléfono: {userToEdit.Phone} -> {dto.Value}";
                     userToEdit.Phone = dto.Value;
                     break;
 
                 case "phonenumber":
+                    actionDescription += $"prefijo de teléfono: {userToEdit.PhonePrefix} -> {dto.Value}";
                     userToEdit.PhonePrefix = dto.Value;
                     break;
 
                 case "usertype":
+                    actionDescription += $"tipo de usuario: {userToEdit.UserType} -> {dto.Value}";
                     userToEdit.UserType = dto.Value;
                     break;
 
                 case "accountstatus":
+                    actionDescription += $"estado de cuenta: {userToEdit.AccountStatus} -> {dto.Value}";
                     userToEdit.AccountStatus = dto.Value;
                     break;
 
                 default:
-                    return false; // Si el campo no es válido, no se actualiza
+                    return false; 
             }
 
             await _userRepository.SaveChangesAsync();
+
+            string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+            await _logService.LogActionAsync(
+                userToEdit.UserId,
+                LogActionTypes.Update, 
+                actionDescription,  
+                ipAddress
+            );
+
             return true;
         }
 
@@ -464,6 +510,24 @@ namespace migrapp_api.Services.Admin
                 Description = log.Description,
                 ActionDate = log.ActionDate
             }).ToList();
+        }
+
+        public async Task<List<UserLogDto>> GetFilteredUserLogsAsync(int userId, UserLogQueryParams queryParams)
+        {
+            var logs = await _userLogRepository.GetFilteredUserLogsAsync(userId, queryParams);
+
+            return logs.Select(log => new UserLogDto
+            {
+                ActionType = log.ActionType,
+                IpAddress = log.IpAddress,
+                Description = log.Description,
+                ActionDate = log.ActionDate
+            }).ToList();
+        }
+
+        public async Task<UserLogFiltersDto> GetUserLogFiltersAsync(int userId)
+        {
+            return await _userLogRepository.GetUserLogFiltersAsync(userId);
         }
 
     }
