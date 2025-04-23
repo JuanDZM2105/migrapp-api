@@ -12,4 +12,5 @@ public interface IUserRepository
     Task<List<string>> GetDistinctCountriesAsync();
     Task<List<User>> GetUsersByIdsAsync(List<int> userIds);
     Task<List<User>> GetUsersWithFullInfoAsync(UserQueryParams queryParams, int userId);
+    Task<int> GetTotalUsers();
 }
