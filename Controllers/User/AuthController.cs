@@ -84,7 +84,7 @@ namespace migrapp_api.Controllers
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 return Unauthorized(new { message = "Credenciales inválidas" });
 
-            await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);
+            await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);    
 
             return Ok(new { message = "Código de verificación enviado" });
         }

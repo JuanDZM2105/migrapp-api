@@ -18,7 +18,7 @@ namespace migrapp_api.Helpers
         public async Task SendEmailAsync(string to, string subject, string body)
         {
             var client = new SendGridClient(_sendGridApiKey);
-            var from = new EmailAddress("juandzm2105@gmail.com", "Tu App");
+            var from = new EmailAddress("anasofiarodriguezorozco@gmail.com", "Tu App");
             var toEmail = new EmailAddress(to);
             string emailBody = $@"
                 <html>
