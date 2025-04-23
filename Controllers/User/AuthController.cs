@@ -20,9 +20,11 @@ namespace migrapp_api.Controllers
     public class AuthController : Controller
     {
         private readonly ApplicationDbContext _appDbContext;
-        public AuthController(ApplicationDbContext appDbContext)
+        private readonly ILoginService _loginService;
+        public AuthController(ApplicationDbContext appDbContext, ILoginService loginService)
         {
             _appDbContext = appDbContext;
+            _loginService = loginService;
         }
 
         [HttpPost("register")]
@@ -34,13 +36,30 @@ namespace migrapp_api.Controllers
             var secretKey = KeyGeneration.GenerateRandomKey(20);
             var base32SecretKey = Base32Encoding.ToString(secretKey);
 
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(model.PasswordHash);
+
             var user = new UserModel()
             {
+                Name = " ",
+                LastName = " ",
                 Email = model.Email,
                 PhonePrefix = model.PhonePrefix,
                 Phone = model.Phone,
-                PasswordHash = model.PasswordHash,
-                OtpSecretKey = base32SecretKey
+                PasswordHash = hashedPassword,
+                Country = " ",
+                AccountStatus = "Active",
+                Type = "Client",
+                LastLogin = DateTime.UtcNow,
+                IsActiveNow = true,
+                OtpSecretKey = base32SecretKey,
+                HasAccessToAllUsers = false,
+
+                Documents = new List<Document>(),
+                ClientLegalProcesses = new List<LegalProcess>(),
+                LawyerLegalProcesses = new List<LegalProcess>(),
+                AssignedProfessionals = new List<AssignedUser>(),
+                AssignedClients = new List<AssignedUser>(),
+                UserLogs = new List<UserLog>()
             };
 
             await _appDbContext.Users.AddAsync(user);
@@ -55,51 +74,28 @@ namespace migrapp_api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] PassWordLogin model)
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            if (model == null)
-                return BadRequest(new { message = "Datos inválidos" });
+            var user = await _appDbContext.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
 
-            var userFound = await _appDbContext.Users
-                .FirstOrDefaultAsync(u => u.Email == model.Email && u.PasswordHash == model.PasswordHash);
+            if (user == null)
+                return Unauthorized(new { message = "Usuario no encontrado" });
 
-            if (userFound == null)
-                return Unauthorized(new { message = "Credenciales incorrectas" });
+            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                return Unauthorized(new { message = "Credenciales inválidas" });
 
-            if (!userFound.IsActiveNow)
-                return Unauthorized(new { message = "Tu cuenta está desactivada. Solicita reactivación para continuar." });
+            await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);    
 
-            var claims = new List<Claim>
-            {
-            new Claim(ClaimTypes.Name, userFound.Name),
-            new Claim(ClaimTypes.Email, userFound.Email)
-            };
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var properties = new AuthenticationProperties
-            {
-                AllowRefresh = true,
-                IsPersistent = model.RememberMe,
-                ExpiresUtc = model.RememberMe
-                    ? DateTimeOffset.UtcNow.AddDays(30)
-                    : DateTimeOffset.UtcNow.AddHours(1)
-            };
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                properties
-            );
-
-            return Ok(new { message = "Inicio de sesión exitoso", user = userFound });
+            return Ok(new { message = "Código de verificación enviado" });
         }
 
-        public class PassWordLogin
+        [HttpPost("verify-mfa")]
+        public async Task<IActionResult> VerifyCode([FromBody] VerifyMfaDto dto)
         {
-            public required string Email { get; set; }       // Email del usuario
-            public required string PasswordHash { get; set; } // Hash de la contraseña
+            var result = await _loginService.VerifyCodeAndGenerateTokenAsync(dto.Email, dto.Code, dto.RememberMe);
+            if (result == null) return Unauthorized(new { message = "Código incorrecto o expirado" });
 
-            public bool RememberMe { get; set; } = false;
+            return Ok(result);
         }
 
     }

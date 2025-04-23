@@ -29,7 +29,7 @@ namespace migrapp_api.Controllers
         [HttpPost("verify-mfa")]
         public async Task<IActionResult> VerifyCode([FromBody] VerifyMfaDto dto)
         {
-            var result = await _loginService.VerifyCodeAndGenerateTokenAsync(dto.Email, dto.Code);
+            var result = await _loginService.VerifyCodeAndGenerateTokenAsync(dto.Email, dto.Code, dto.RememberMe);
             if (result == null) return Unauthorized(new { message = "Código incorrecto o expirado" });
 
             return Ok(result);
