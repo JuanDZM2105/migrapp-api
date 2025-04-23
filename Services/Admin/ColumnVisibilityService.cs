@@ -1,7 +1,7 @@
 ﻿using migrapp_api.DTOs.Admin;
 using migrapp_api.Repositories;
 using System.Threading.Tasks;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 
 namespace migrapp_api.Services.Admin
 {

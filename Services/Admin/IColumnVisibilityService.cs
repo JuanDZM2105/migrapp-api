@@ -5,7 +5,7 @@ namespace migrapp_api.Services.Admin
 {
     public interface IColumnVisibilityService
     {
-        Task<AvailableColumnsDto> GetAvailableColumnsAsync(int UserId); 
+        Task<AvailableColumnsDto> GetAvailableColumnsAsync(int UserId);
         Task SaveColumnVisibilityAsync(int userId, SaveColumnVisibilityDto dto);
     }
 }

@@ -1,8 +1,9 @@
 ﻿using migrapp_api.DTOs.Admin;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 using migrapp_api.Repositories;
 using Microsoft.AspNetCore.Identity;
 using migrapp_api.Helpers.Admin;
+using UserModel = migrapp_api.Models.User;
 using OfficeOpenXml;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
@@ -14,7 +15,7 @@ namespace migrapp_api.Services.Admin
     {
         private readonly IUserRepository _userRepository;
         private readonly IAssignedUserRepository _assignedUserRepository;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IPasswordHasher<UserModel> _passwordHasher;
         private readonly IColumnVisibilityRepository _columnVisibilityRepository;
         private readonly IUserLogRepository _userLogRepository;
         private readonly ILogService _logService;
@@ -23,7 +24,7 @@ namespace migrapp_api.Services.Admin
         public AdminUserService(
             IUserRepository userRepository,
             IAssignedUserRepository assignedUserRepository,
-            IPasswordHasher<User> passwordHasher,
+            IPasswordHasher<UserModel> passwordHasher,
             IColumnVisibilityRepository columnVisibilityRepository,
             IUserLogRepository userLogRepository,
             ILogService logService,
@@ -40,7 +41,7 @@ namespace migrapp_api.Services.Admin
 
         public async Task<bool> CreateUserAsync(CreateUserByAdminDto dto)
         {
-            var newUser = new User
+            var newUser = new UserModel
             {
                 Email = dto.Email,
                 Name = dto.Name,
@@ -50,7 +51,7 @@ namespace migrapp_api.Services.Admin
                 PhonePrefix = dto.PhonePrefix,
                 PasswordHash = _passwordHasher.HashPassword(null, dto.Password),
                 AccountStatus = "active",
-                UserType = dto.UserType,
+                Type = dto.UserType,
                 AccountCreated = DateTime.UtcNow,
                 HasAccessToAllUsers = dto.HasAccessToAllUsers // Aquí asignamos el valor
             };
@@ -73,7 +74,7 @@ namespace migrapp_api.Services.Admin
                     var assigned = new AssignedUser
                     {
                         ClientUserId = assignedUserId,
-                        ProfessionalUserId = newUser.UserId,
+                        ProfessionalUserId = newUser.Id,
                         ProfessionalRole = dto.UserType,
                         AssignedAt = DateTime.UtcNow
                     };
@@ -86,9 +87,9 @@ namespace migrapp_api.Services.Admin
             string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 
             await _logService.LogActionAsync(
-                newUser.UserId,
+                newUser.Id,
                 LogActionTypes.Create,
-                $"Usuario creado: {newUser.Email}, Tipo: {newUser.UserType}",
+                $"Usuario creado: {newUser.Email}, Tipo: {newUser.Type}",
                 ipAddress);
 
             return true;
@@ -113,7 +114,7 @@ namespace migrapp_api.Services.Admin
                 Country = user.Country,
                 Phone = user.Phone,
                 PhonePrefix = user.PhonePrefix,
-                UserType = user.UserType,
+                UserType = user.Type,
                 AccountStatus = user.AccountStatus,
                 AccountCreated = user.AccountCreated,
                 BirthDate = user.BirthDate,
@@ -151,7 +152,7 @@ namespace migrapp_api.Services.Admin
         {
             var validFields = new List<string> { "accountStatus", "userType" };
 
-            if (!validFields.Contains(dto.Field)) 
+            if (!validFields.Contains(dto.Field))
             {
                 throw new ArgumentException("Campo no válido.");
             }
@@ -178,11 +179,11 @@ namespace migrapp_api.Services.Admin
             {
                 if (dto.Field == "accountStatus")
                 {
-                    user.AccountStatus = dto.Value;  
+                    user.AccountStatus = dto.Value;
                 }
                 else if (dto.Field == "userType")
                 {
-                    user.UserType = dto.Value;  
+                    user.Type = dto.Value;
                 }
             }
 
@@ -239,7 +240,7 @@ namespace migrapp_api.Services.Admin
                 columnVisibility = new ColumnVisibility
                 {
                     UserId = userId,
-                    VisibleColumns = string.Join(",", new List<string> { "name", "email", "country", "phone", "accountStatus", "userType" })
+                    VisibleColumns = string.Join(",", new List<string> { "name", "email", "country", "phone", "accountStatus", "type" })
                 };
                 await _columnVisibilityRepository.SaveColumnVisibilityAsync(columnVisibility);
             }
@@ -254,7 +255,7 @@ namespace migrapp_api.Services.Admin
             {
                 var userDto = new UserDto
                 {
-                    UserId = user.UserId,
+                    UserId = user.Id,
                     Name = visibleColumns.Contains("name") ? user.Name : null,
                     LastName = visibleColumns.Contains("lastName") ? user.LastName : null,
                     Email = visibleColumns.Contains("email") ? user.Email : null,
@@ -262,7 +263,7 @@ namespace migrapp_api.Services.Admin
                     PhonePrefix = visibleColumns.Contains("phonePrefix") ? user.PhonePrefix : null,
                     Country = visibleColumns.Contains("country") ? user.Country : null,
                     AccountStatus = visibleColumns.Contains("accountStatus") ? user.AccountStatus : null,
-                    UserType = visibleColumns.Contains("userType") ? user.UserType : null,
+                    UserType = visibleColumns.Contains("type") ? user.Type : null,
                     BirthDate = visibleColumns.Contains("birthDate") ? user.BirthDate : null,
                     AccountCreated = visibleColumns.Contains("accountCreated") ? user.AccountCreated : null,
                     LastLogin = visibleColumns.Contains("lastLogin") ? user.LastLogin : null,
@@ -292,7 +293,7 @@ namespace migrapp_api.Services.Admin
 
             var users = await _userRepository.GetUsersWithFullInfoAsync(queryParams, userId);
 
-            
+
             using (var package = new ExcelPackage())
             {
                 var worksheet = package.Workbook.Worksheets.Add("Users");
@@ -334,7 +335,7 @@ namespace migrapp_api.Services.Admin
                     if (visibleColumns.Contains("accountStatus"))
                         worksheet.Cells[rowIndex, colIndex++].Value = user.AccountStatus;
                     if (visibleColumns.Contains("userType"))
-                        worksheet.Cells[rowIndex, colIndex++].Value = user.UserType;
+                        worksheet.Cells[rowIndex, colIndex++].Value = user.Type;
 
                     rowIndex++;
                 }
@@ -350,16 +351,16 @@ namespace migrapp_api.Services.Admin
             var currentUser = await _userRepository.GetByIdAsync(currentUserId);
             var userToFetch = await _userRepository.GetByIdAsync(userId);
 
-            if (userToFetch == null) return null; 
+            if (userToFetch == null) return null;
 
-            if (currentUser.UserType == "admin")
+            if (currentUser.Type == "admin")
             {
                 return MapToUserInfoDto(userToFetch);
             }
 
             if (userToFetch.AccountStatus == "eliminated" || userToFetch.AccountStatus == "blocked")
             {
-                return null; 
+                return null;
             }
 
             if (currentUser.HasAccessToAllUsers)
@@ -378,7 +379,7 @@ namespace migrapp_api.Services.Admin
             return null;
         }
 
-        private UserInfoDto MapToUserInfoDto(User user)
+        private UserInfoDto MapToUserInfoDto(UserModel user)
         {
             return new UserInfoDto
             {
@@ -387,7 +388,7 @@ namespace migrapp_api.Services.Admin
                 Email = user.Email,
                 Country = user.Country,
                 Phone = user.Phone,
-                UserType = user.UserType,
+                UserType = user.Type,
                 AccountStatus = user.AccountStatus,
                 IsActiveNow = user.IsActiveNow,
             };
@@ -437,8 +438,8 @@ namespace migrapp_api.Services.Admin
                     break;
 
                 case "usertype":
-                    actionDescription += $"tipo de usuario: {userToEdit.UserType} -> {dto.Value}";
-                    userToEdit.UserType = dto.Value;
+                    actionDescription += $"tipo de usuario: {userToEdit.Type} -> {dto.Value}";
+                    userToEdit.Type = dto.Value;
                     break;
 
                 case "accountstatus":
@@ -455,7 +456,7 @@ namespace migrapp_api.Services.Admin
             string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
 
             await _logService.LogActionAsync(
-                userToEdit.UserId,
+                userToEdit.Id,
                 LogActionTypes.Update, 
                 actionDescription,  
                 ipAddress
@@ -474,7 +475,7 @@ namespace migrapp_api.Services.Admin
                 return false;
             }
 
-            if (currentUser.UserType == "admin")
+            if (currentUser.Type == "admin")
             {
                 return true;
             }
@@ -486,7 +487,7 @@ namespace migrapp_api.Services.Admin
 
             if (userToFetch.AccountStatus == "eliminated" || userToFetch.AccountStatus == "blocked")
             {
-                return false; 
+                return false;
             }
 
             var assignedUsers = await _assignedUserRepository.GetAssignedUsersAsync(currentUserId);

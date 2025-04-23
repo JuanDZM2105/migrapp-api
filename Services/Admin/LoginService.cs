@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using migrapp_api.DTOs.Auth;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 using migrapp_api.Helpers;
 using migrapp_api.Helpers.Admin;
 using migrapp_api.Repositories;
@@ -39,7 +39,7 @@ public class LoginService : ILoginService
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);
 
-        if (user == null || user.UserType == "user")
+        if (user == null || user.Type == "user")
             return false;
 
         var passwordHasher = new PasswordHasher<User>();
@@ -86,7 +86,7 @@ public class LoginService : ILoginService
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null) return null;
 
-        var token = _jwtTokenGenerator.GenerateToken(user.Email, user.UserType, user.UserId);
+        var token = _jwtTokenGenerator.GenerateToken(user.Email, user.Type, user.Id);
 
         string ipAddress = "123.123.123.123";
 
@@ -107,7 +107,7 @@ public class LoginService : ILoginService
 
 
         await _logService.LogActionAsync(
-            user.UserId,
+            user.Id,
             LogActionTypes.Login,
             "Inicio de sesión exitoso",
             ipAddress);
@@ -116,7 +116,7 @@ public class LoginService : ILoginService
         {
             Token = token,
             Email = user.Email,
-            UserType = user.UserType
+            UserType = user.Type
         };
     }
 }

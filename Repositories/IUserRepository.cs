@@ -1,5 +1,5 @@
 ﻿using migrapp_api.DTOs.Admin;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 
 public interface IUserRepository
 {

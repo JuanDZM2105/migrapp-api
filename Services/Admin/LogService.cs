@@ -1,4 +1,4 @@
-﻿using migrapp_api.Entidades;
+﻿using migrapp_api.Models;
 using migrapp_api.Repositories;
 using System;
 using System.Threading.Tasks;

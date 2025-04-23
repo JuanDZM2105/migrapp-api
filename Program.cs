@@ -7,7 +7,7 @@ using FluentValidation;
 using migrapp_api.Validators.Admin;
 using migrapp_api.Validators.Admin;
 using Microsoft.AspNetCore.Identity;
-using migrapp_api.Entidades;
+using migrapp_api.Models;
 using migrapp_api.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -24,8 +24,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
-builder.Services.AddDbContext<ApplicationDbContext>(opciones => 
-    opciones.UseSqlServer("name=DefaultConnection"));
+builder.Services.AddDbContext<ApplicationDbContext>(opciones =>
+    opciones.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddOutputCache(opciones =>
 {
