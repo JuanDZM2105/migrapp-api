@@ -78,7 +78,7 @@ public class LoginService : ILoginService
         return await _mfaCodeRepository.VerifyCodeAsync(email, code);
     }
 
-    public async Task<AuthResponseDto?> VerifyCodeAndGenerateTokenAsync(string email, string code)
+    public async Task<AuthResponseDto?> VerifyCodeAndGenerateTokenAsync(string email, string code, bool rememberMe)
     {
         var isValid = await _mfaCodeRepository.VerifyCodeAsync(email, code);
         if (!isValid) return null;
@@ -86,7 +86,7 @@ public class LoginService : ILoginService
         var user = await _userRepository.GetByEmailAsync(email);
         if (user == null) return null;
 
-        var token = _jwtTokenGenerator.GenerateToken(user.Email, user.Type, user.Id);
+        var token = _jwtTokenGenerator.GenerateToken(user.Email, user.Type, user.Id, rememberMe);
 
         string ipAddress = "123.123.123.123";
 

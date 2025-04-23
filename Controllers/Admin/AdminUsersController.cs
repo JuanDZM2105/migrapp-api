@@ -24,6 +24,7 @@ namespace migrapp_api.Controllers.Admin
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserByAdminDto dto)
         {
             var result = await _adminUserService.CreateUserAsync(dto);
@@ -34,6 +35,7 @@ namespace migrapp_api.Controllers.Admin
         }
 
         [HttpGet("available-users")]
+        [Authorize]
         public async Task<IActionResult> GetAvailableUsers()
         {
             var users = await _userRepository.GetUsersByTypeAsync("user");

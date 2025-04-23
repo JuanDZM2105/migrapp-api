@@ -18,7 +18,7 @@ namespace migrapp_api.Helpers
         public async Task SendEmailAsync(string to, string subject, string body)
         {
             var client = new SendGridClient(_sendGridApiKey);
-            var from = new EmailAddress("juandzm2105@gmail.com", "Tu App");
+            var from = new EmailAddress("anasofiarodriguezorozco@gmail.com", "Tu App");
             var toEmail = new EmailAddress(to);
             string emailBody = $@"
                 <html>
@@ -63,7 +63,7 @@ namespace migrapp_api.Helpers
             _configuration = configuration;
         }
 
-        public string GenerateToken(string email, string userType, int userId)
+        public string GenerateToken(string email, string userType, int userId, bool rememberMe)
         {
             var claims = new[]
             {
@@ -80,7 +80,9 @@ namespace migrapp_api.Helpers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
+                expires: rememberMe
+                    ? DateTime.UtcNow.AddDays(30)
+                    : DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds
             );
 

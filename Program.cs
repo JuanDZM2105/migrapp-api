@@ -7,6 +7,7 @@ using FluentValidation;
 using migrapp_api.Validators.Admin;
 using migrapp_api.Validators.Admin;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using migrapp_api.Models;
 using migrapp_api.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,11 +15,17 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+var config = builder.Configuration;
 
 // Add services to the container.
 
+builder.Services.AddAuthorization();
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -46,6 +53,9 @@ builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
 builder.Services.AddScoped<IUserLogRepository, UserLogRepository>();
 builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<IMetricsRepository, MetricsRepository>();
+builder.Services.AddScoped<IMetricsService, MetricsService>();
+
 
 
 builder.Services.AddHttpContextAccessor();
