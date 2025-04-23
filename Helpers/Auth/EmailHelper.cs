@@ -37,7 +37,7 @@ namespace migrapp_api.Helpers
             _configuration = configuration;
         }
 
-        public string GenerateToken(string email, string userType, int userId)
+        public string GenerateToken(string email, string userType, int userId, bool rememberMe)
         {
             var claims = new[]
             {
@@ -54,7 +54,9 @@ namespace migrapp_api.Helpers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(30),
+                expires: rememberMe
+                    ? DateTime.UtcNow.AddDays(30)
+                    : DateTime.UtcNow.AddMinutes(30),
                 signingCredentials: creds
             );
 
