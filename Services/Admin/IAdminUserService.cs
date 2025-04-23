@@ -16,5 +16,7 @@ namespace migrapp_api.Services.Admin
         Task<bool> EditUserInfoAsync(int userId, EditUserInfoDto dto);
         Task<bool> HasAccessToUserLogs(int currentUserId, int userId);
         Task<List<UserLogDto>> GetUserLogsAsync(int userId);
+        Task<List<UserLogDto>> GetFilteredUserLogsAsync(int userId, UserLogQueryParams queryParams);
+        Task<UserLogFiltersDto> GetUserLogFiltersAsync(int userId);
     }
 }
