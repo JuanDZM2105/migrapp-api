@@ -52,6 +52,9 @@ builder.Services.AddSingleton<ISmsHelper, SmsHelper>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
 builder.Services.AddScoped<IUserLogRepository, UserLogRepository>();
+builder.Services.AddScoped<IMetricsRepository, MetricsRepository>();
+builder.Services.AddScoped<IMetricsService, MetricsService>();
+
 
 
 
