@@ -27,7 +27,7 @@ namespace migrapp_api.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
             if (model == null)
-                return BadRequest(new { message = "Datos inválidos" });
+                return BadRequest(new { message = "Datos invï¿½lidos" });
 
             var secretKey = KeyGeneration.GenerateRandomKey(20);
             var base32SecretKey = Base32Encoding.ToString(secretKey);
@@ -78,7 +78,7 @@ namespace migrapp_api.Controllers
                 return Unauthorized(new { message = "Usuario no encontrado" });
 
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                return Unauthorized(new { message = "Credenciales inválidas" });
+                return Unauthorized(new { message = "Credenciales invï¿½lidas" });
 
             var trustedResult = await _loginService.VerifyTrustedDevice(HttpContext, user, dto.RememberMe);
             if (trustedResult != null && trustedResult.DeviceIsTrusted)
@@ -88,14 +88,14 @@ namespace migrapp_api.Controllers
 
             await _loginService.GenerateAndSendMfaCodeAsync(user.Email, dto.PreferredMfaMethod);
 
-            return Ok(new { message = "Código de verificación enviado" });
+            return Ok(new { message = "Código de verificaciï¿½n enviado" });
         }
 
         [HttpPost("verify-mfa")]
         public async Task<IActionResult> VerifyCode([FromBody] VerifyMfaDto dto)
         {
             var result = await _loginService.VerifyCodeAndGenerateTokenAsync(dto.Email, dto.Code, dto.RememberMe);
-            if (result == null) return Unauthorized(new { message = "Código incorrecto o expirado" });
+            if (result == null) return Unauthorized(new { message = "Cï¿½digo incorrecto o expirado" });
 
             await _loginService.CreateTrustedDevice(HttpContext, dto.Email, dto.RememberMe);
 
