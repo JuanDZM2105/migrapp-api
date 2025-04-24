@@ -124,7 +124,8 @@ public class LoginService : ILoginService
             Token = token,
             Email = user.Email,
             UserType = user.Type,
-            DeviceIsTrusted = rememberMe
+            DeviceIsTrusted = rememberMe,
+            UserId = user.Id
         };
     }
 
@@ -149,7 +150,8 @@ public class LoginService : ILoginService
                 Token = token,
                 Email = user.Email,
                 UserType = user.Type,
-                DeviceIsTrusted = true
+                DeviceIsTrusted = true,
+                UserId = user.Id
             };
         }
 
