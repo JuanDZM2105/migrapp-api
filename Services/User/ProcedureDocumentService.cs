@@ -32,7 +32,6 @@ public class ProcedureDocumentService : IProcedureDocumentService
     // 1. Validar tipo y tamaño
     ValidateFile(file);
 
-    Console.WriteLine("Este print aparece en la terminal");
     // 2. Cargar ProcedureDocument + verificar dueño
     var procDoc = await _ctx.ProcedureDocuments
       .Include(pd => pd.Procedure)
@@ -43,8 +42,6 @@ public class ProcedureDocumentService : IProcedureDocumentService
       pd.Procedure != null &&
       pd.Procedure.LegalProcess != null &&
       pd.Procedure.LegalProcess.ClientUserId == userId);
-
-    Console.WriteLine("Este print aparece en la terminal #2");
 
     if (procDoc == null)
       throw new Exception("No se encontró el ProcedureDocument");
@@ -59,8 +56,6 @@ public class ProcedureDocumentService : IProcedureDocumentService
     if (procDoc.Procedure.LegalProcess.ClientUserId != userId)
       throw new UnauthorizedAccessException("Usuario no autorizado");
 
-    Console.WriteLine("Este print aparece en terminal #3");
-
     // 3. Si ya existe un Document: bórralo (físico + BD)
     if (procDoc.Document != null)
       await DeletePhysicalFileAndRecord(procDoc.Document);
@@ -74,7 +69,6 @@ public class ProcedureDocumentService : IProcedureDocumentService
     await using (var stream = new FileStream(fullPath, FileMode.Create))
       await file.CopyToAsync(stream);
 
-    Console.WriteLine("Este #4");
     // 5. Crear registro en BD
     var doc = new Document
     {
@@ -87,14 +81,10 @@ public class ProcedureDocumentService : IProcedureDocumentService
     _ctx.Documents.Add(doc);
     await _ctx.SaveChangesAsync();
 
-
-    Console.WriteLine("Este #5");
     // 6. Actualizar el ProcedureDocument
     procDoc.DocumentId = doc.Id;
     procDoc.IsUploaded = true;
     await _ctx.SaveChangesAsync();
-
-    Console.WriteLine("Este #6");
 
     return doc;
   }

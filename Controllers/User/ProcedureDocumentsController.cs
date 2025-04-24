@@ -23,14 +23,10 @@ public class ProcedureDocumentsController : ControllerBase
   {
     try
     {
-      Console.WriteLine("Entró en el metodo");
       var userId = GetUserId();
-
-      Console.WriteLine($"Se obtuvo el id del usuario bien: {userId} ");
 
       var doc = await _documentService.UploadAsync(procedureDocumentId, file, userId);
 
-      Console.WriteLine("Acá salió del servicio.");
       return Ok(new
       {
         doc.Id,
