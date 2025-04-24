@@ -113,5 +113,10 @@ public class UserRepository : IUserRepository
             .Where(a => a.ProfessionalUserId == userId || a.ClientUserId == userId)
             .ToListAsync();
     }
+
+    public async Task<int> GetTotalUsers()
+    {
+        return await _context.Users.CountAsync();
+    }
 }
 

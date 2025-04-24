@@ -24,6 +24,7 @@ namespace migrapp_api.Controllers.Admin
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> CreateUser([FromBody] CreateUserByAdminDto dto)
         {
             var result = await _adminUserService.CreateUserAsync(dto);
@@ -34,6 +35,7 @@ namespace migrapp_api.Controllers.Admin
         }
 
         [HttpGet("available-users")]
+        [Authorize]
         public async Task<IActionResult> GetAvailableUsers()
         {
             var users = await _userRepository.GetUsersByTypeAsync("user");
@@ -229,7 +231,7 @@ namespace migrapp_api.Controllers.Admin
 
         [HttpGet("{userId}/logs")]
         [Authorize]
-        public async Task<IActionResult> GetUserLogs(int userId)
+        public async Task<IActionResult> GetUserLogs(int userId, [FromQuery] UserLogQueryParams queryParams)
         {
             try
             {
@@ -242,7 +244,7 @@ namespace migrapp_api.Controllers.Admin
                     return Unauthorized(new { message = "No tiene permiso para ver los logs de este usuario." });
                 }
 
-                var logs = await _adminUserService.GetUserLogsAsync(userId);
+                var logs = await _adminUserService.GetFilteredUserLogsAsync(userId, queryParams);
 
                 if (logs == null || !logs.Any())
                 {
@@ -257,5 +259,27 @@ namespace migrapp_api.Controllers.Admin
             }
         }
 
+        [HttpGet("{userId}/logs/filters")]
+        [Authorize]
+        public async Task<IActionResult> GetUserLogFilters(int userId)
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                var hasAccess = await _adminUserService.HasAccessToUserLogs(currentUserId, userId);
+                if (!hasAccess)
+                {
+                    return Unauthorized(new { message = "No tiene permiso para ver los logs de este usuario." });
+                }
+
+                var filters = await _adminUserService.GetUserLogFiltersAsync(userId);
+                return Ok(filters);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener los filtros", details = ex.Message });
+            }
+        }
     }
 }

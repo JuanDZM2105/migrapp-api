@@ -56,9 +56,18 @@ builder.Services.AddSingleton<ISmsHelper, SmsHelper>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
 builder.Services.AddScoped<IUserLogRepository, UserLogRepository>();
+
 builder.Services.AddScoped<IProcedureDocumentService, ProcedureDocumentService>();
 builder.Services.AddScoped<IHelpCenterService, HelpCenterService>();
 builder.Services.AddScoped<DataSeeder>();
+builder.Services.AddScoped<ILogService, LogService>();
+builder.Services.AddScoped<IMetricsRepository, MetricsRepository>();
+builder.Services.AddScoped<IMetricsService, MetricsService>();
+
+
+
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserByAdminDtoValidator>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
