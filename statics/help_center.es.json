@@ -1,0 +1,45 @@
+{
+  "title": "Centro de Ayuda",
+  "categories": [
+    {
+      "title": "Trámites Comunes en Estados Unidos",
+      "articles": [
+        {
+          "id": "ssn-application",
+          "title": "Cómo Solicitar un Número de Seguro Social (SSN)",
+          "content": "Para solicitar un SSN, visita la oficina local del Seguro Social con documentos que prueben tu identidad, edad y autorización para trabajar."
+        },
+        {
+          "id": "driver-license",
+          "title": "Obtener una Licencia de Conducir",
+          "content": "Visita el sitio web del DMV de tu estado para ver los requisitos. Generalmente se requiere prueba de residencia, identificación y aprobar exámenes teóricos y prácticos."
+        },
+        {
+          "id": "health-insurance",
+          "title": "Cómo Solicitar un Seguro de Salud",
+          "content": "Puedes solicitarlo a través del Mercado de Seguros en healthcare.gov o mediante el programa estatal de Medicaid si cumples con los requisitos."
+        }
+      ]
+    },
+    {
+      "title": "Cuenta y Uso",
+      "articles": [
+        {
+          "id": "login-help",
+          "title": "Cómo Iniciar Sesión",
+          "content": "Haz clic en el botón 'Iniciar sesión' en la esquina superior derecha e ingresa tu correo electrónico y contraseña. Si la olvidaste, usa la opción '¿Olvidaste tu contraseña?'."
+        },
+        {
+          "id": "upload-document",
+          "title": "Cómo Subir un Documento",
+          "content": "Ve a la sección 'Documentos' en tu perfil, haz clic en 'Subir', selecciona tu archivo y confirma. Solo se permiten archivos PDF e imágenes."
+        },
+        {
+          "id": "access-profile",
+          "title": "Cómo Acceder a Tu Perfil",
+          "content": "Haz clic en tu nombre o avatar en el menú superior y selecciona 'Mi perfil' para ver y editar tu información personal."
+        }
+      ]
+    }
+  ]
+}

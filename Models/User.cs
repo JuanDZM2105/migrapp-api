@@ -36,7 +36,7 @@ namespace migrapp_api.Models
         public DateTime AccountCreated { get; set; } = DateTime.UtcNow;
 
         [Required, MaxLength(20)]
-        public string AccountStatus { get; set; }
+        public string AccountStatus { get; set; } = "Active";
 
         [Required, MaxLength(20)]
         public string Type { get; set; }
