@@ -16,6 +16,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 using migrapp_api.Services.HelpCenter;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using migrapp_api.Services.User;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;// Add services to the container.
@@ -43,8 +45,11 @@ builder.Services.AddOutputCache(opciones =>
 builder.Services.Configure<UploadSettings>(
     builder.Configuration.GetSection("UploadSettings"));
 
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+Console.WriteLine("Iniciando la app...");
 
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IUserDocumentService, UserDocumentService>();
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IColumnVisibilityRepository, ColumnVisibilityRepository>();
 builder.Services.AddScoped<IAdminUserService, AdminUserService>();
@@ -61,7 +66,6 @@ builder.Services.AddScoped<IHelpCenterService, HelpCenterService>();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserByAdminDtoValidator>();
 
-builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 builder.Services.AddSwaggerGen(c =>
 {
@@ -153,7 +157,7 @@ app.UseStaticFiles(new StaticFileOptions
   FileProvider = new PhysicalFileProvider(
         Path.Combine(app.Environment.ContentRootPath, uploadOpts.StoragePath)
     ),
-  RequestPath = "/uploads"
+  RequestPath = "/Uploads"
 });
 
 app.UseCors();
