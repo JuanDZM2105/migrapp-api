@@ -7,7 +7,6 @@ using FluentValidation;
 using migrapp_api.Validators.Admin;
 using migrapp_api.Validators.Admin;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using migrapp_api.Models;
 using migrapp_api.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -19,9 +18,8 @@ using migrapp_api.Services.HelpCenter;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
-var config = builder.Configuration;
+var config = builder.Configuration;// Add services to the container.
 
-// Add services to the container.
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
@@ -29,7 +27,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -61,7 +58,7 @@ builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
 builder.Services.AddScoped<IUserLogRepository, UserLogRepository>();
 builder.Services.AddScoped<IProcedureDocumentService, ProcedureDocumentService>();
 builder.Services.AddScoped<IHelpCenterService, HelpCenterService>();
-
+builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserByAdminDtoValidator>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
@@ -138,6 +135,8 @@ using (var scope = app.Services.CreateScope())
   var services = scope.ServiceProvider;
   var context = services.GetRequiredService<ApplicationDbContext>();
   DbSeeder.Seed(context);
+  var ClientSeeder = new DataSeeder(context);
+  ClientSeeder.Seed();
 }
 
 // Configure the HTTP request pipeline.
