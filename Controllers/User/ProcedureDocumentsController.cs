@@ -3,96 +3,109 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using migrapp_api.Services.User;
 using System.Threading.Tasks;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/procedures/{procedureId}/documents")]
 [Authorize(Roles = "Client")] // Solo clientes pueden acceder
 public class ProcedureDocumentsController : ControllerBase
 {
-    private readonly IProcedureDocumentService _documentService;
+  private readonly IProcedureDocumentService _documentService;
 
-    public ProcedureDocumentsController(IProcedureDocumentService documentService)
+  public ProcedureDocumentsController(IProcedureDocumentService documentService)
+  {
+    _documentService = documentService;
+  }
+
+  // POST: subir documento
+  [HttpPost("{procedureDocumentId}/upload")]
+  public async Task<IActionResult> Upload(int procedureId, int procedureDocumentId, IFormFile file)
+  {
+    try
     {
-        _documentService = documentService;
-    }
+      Console.WriteLine("Entró en el metodo");
+      var userId = GetUserId();
 
-    // POST: subir documento
-    [HttpPost("{procedureDocumentId}/upload")]
-    public async Task<IActionResult> Upload(int procedureId, int procedureDocumentId, IFormFile file)
+      Console.WriteLine($"Se obtuvo el id del usuario bien: {userId} ");
+
+      var doc = await _documentService.UploadAsync(procedureDocumentId, file, userId);
+
+      Console.WriteLine("Acá salió del servicio.");
+      return Ok(new
+      {
+        doc.Id,
+        doc.Name,
+        doc.UploadedAt
+      });
+    }
+    catch (Exception ex)
     {
-        try
-        {
-            var userId = GetUserId();
-            var doc = await _documentService.UploadAsync(procedureDocumentId, file, userId);
-            return Ok(new {
-                doc.Id,
-                doc.Name,
-                doc.UploadedAt
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+      return BadRequest(new { error = ex.Message });
     }
+  }
 
-    // GET: descargar documento
-    [HttpGet("{procedureDocumentId}/download")]
-    public async Task<IActionResult> Download(int procedureId, int procedureDocumentId)
+  // GET: descargar documento
+  [HttpGet("{procedureDocumentId}/download")]
+  public async Task<IActionResult> Download(int procedureId, int procedureDocumentId)
+  {
+    try
     {
-        try
-        {
-            var userId = GetUserId();
+      var userId = GetUserId();
 
-            // Necesitamos cargar el ID del documento desde ProcedureDocument (opcional si ya lo sabes)
-            var streamResult = await _documentService.DownloadAsync(procedureDocumentId);
-            return streamResult;
-        }
-        catch (Exception ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
+      // Necesitamos cargar el ID del documento desde ProcedureDocument (opcional si ya lo sabes)
+      var streamResult = await _documentService.DownloadAsync(procedureDocumentId);
+      return streamResult;
     }
-
-    // PUT: reemplazar documento
-    [HttpPut("{procedureDocumentId}/replace")]
-    public async Task<IActionResult> Replace(int procedureId, int procedureDocumentId, IFormFile file)
+    catch (Exception ex)
     {
-        try
-        {
-            var userId = GetUserId();
-            var doc = await _documentService.ReplaceAsync(procedureDocumentId, file, userId);
-            return Ok(new {
-                doc.Id,
-                doc.Name,
-                doc.UploadedAt
-            });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
+      return NotFound(new { error = ex.Message });
     }
+  }
 
-    // DELETE: eliminar documento
-    [HttpDelete("{procedureDocumentId}")]
-    public async Task<IActionResult> Delete(int procedureId, int procedureDocumentId)
+  // PUT: reemplazar documento
+  [HttpPut("{procedureDocumentId}/replace")]
+  public async Task<IActionResult> Replace(int procedureId, int procedureDocumentId, IFormFile file)
+  {
+    try
     {
-        try
-        {
-            var userId = GetUserId();
-            await _documentService.DeleteAsync(procedureDocumentId, userId);
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            return NotFound(new { error = ex.Message });
-        }
+      var userId = GetUserId();
+      var doc = await _documentService.ReplaceAsync(procedureDocumentId, file, userId);
+      return Ok(new
+      {
+        doc.Id,
+        doc.Name,
+        doc.UploadedAt
+      });
     }
+    catch (Exception ex)
+    {
+      return BadRequest(new { error = ex.Message });
+    }
+  }
 
-    // Extrae el ID del usuario autenticado desde el token JWT
-    private int GetUserId()
+  // DELETE: eliminar documento
+  [HttpDelete("{procedureDocumentId}")]
+  public async Task<IActionResult> Delete(int procedureId, int procedureDocumentId)
+  {
+    try
     {
-        return int.Parse(User.FindFirst("id").Value);
+      var userId = GetUserId();
+      await _documentService.DeleteAsync(procedureDocumentId, userId);
+      return NoContent();
     }
+    catch (Exception ex)
+    {
+      return NotFound(new { error = ex.Message });
+    }
+  }
+
+  // Extrae el ID del usuario autenticado desde el token JWT
+  private int GetUserId()
+  {
+    var userIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier) ?? User?.FindFirst("sub");
+    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+      throw new UnauthorizedAccessException("Usuario no autenticado.");
+
+    return userId;
+  }
 }
