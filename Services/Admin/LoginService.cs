@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using migrapp_api.DTOs.Auth;
+using migrapp_api.DTOs;
 using migrapp_api.Models;
 using migrapp_api.Helpers;
 using migrapp_api.Helpers.Admin;
 using migrapp_api.Repositories;
 using migrapp_api.Services.Admin;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Mvc;
+using migrapp_api.Helpers.Auth;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 public class LoginService : ILoginService
 {
@@ -15,6 +19,7 @@ public class LoginService : ILoginService
     private readonly ISmsHelper _smsHelper;
     private readonly IMfaCodeRepository _mfaCodeRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IDeviceHelper _deviceHelper;
     private readonly ILogService _logService;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -23,6 +28,7 @@ public class LoginService : ILoginService
                         ISmsHelper smsHelper,
                         IMfaCodeRepository mfaCodeRepository,
                         IJwtTokenGenerator jwtTokenGenerator,
+                        IDeviceHelper deviceHelper,
                         ILogService logService,
                         IHttpContextAccessor httpContextAccessor)
     {
@@ -31,6 +37,7 @@ public class LoginService : ILoginService
         _smsHelper = smsHelper;
         _mfaCodeRepository = mfaCodeRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _deviceHelper = deviceHelper;
         _logService = logService;
         _httpContextAccessor = httpContextAccessor;
     }
@@ -116,7 +123,64 @@ public class LoginService : ILoginService
         {
             Token = token,
             Email = user.Email,
-            UserType = user.Type
+            UserType = user.Type,
+            DeviceIsTrusted = rememberMe
         };
     }
+
+    public async Task<AuthResponseDto?> VerifyTrustedDevice(HttpContext context, User user, bool rememberMe)
+    {
+        var cookie = context.Request.Cookies["trusted_device"];
+        var userAgent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? "unknown-device";
+
+        if (string.IsNullOrEmpty(cookie))
+        {
+            // No hay cookie, no es dispositivo confiable
+            return null;
+        }
+
+        var expectedToken = _deviceHelper.GenerateDeviceToken(user.Id, userAgent);
+
+        if (cookie == expectedToken)
+        {
+            var token = _jwtTokenGenerator.GenerateToken(user.Email, user.Type, user.Id, rememberMe);
+            return new AuthResponseDto
+            {
+                Token = token,
+                Email = user.Email,
+                UserType = user.Type,
+                DeviceIsTrusted = true
+            };
+        }
+
+        // Cookie no coincide, no es dispositivo confiable
+        return null;
+    }
+
+
+    public async Task<bool> CreateTrustedDevice(HttpContext context, string email, bool rememberMe)
+    {
+        var user = await _userRepository.GetByEmailAsync(email);
+        if (user == null) return false;
+
+        if (rememberMe)
+        {
+            var userAgent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? "Test-Agent"; // Por ahora para las pruebas
+            if (string.IsNullOrEmpty(userAgent))
+                throw new Exception("User-Agent header is missing");
+            var token = _deviceHelper.GenerateDeviceToken(user.Id, userAgent);
+            context.Response.Cookies.Append("trusted_device", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                SameSite = SameSiteMode.Strict
+            });
+
+            return true;
+        }
+
+        return false;
+    }
+
 }

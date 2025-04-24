@@ -5,7 +5,7 @@ using FluentAssertions;
 
 namespace migrapp_api.Tests.StepDefinitions
 {
-    
+
     public class LoginUserSteps
     {
         private IWebDriver _driver;
@@ -29,7 +29,7 @@ namespace migrapp_api.Tests.StepDefinitions
         [When(@"se le solicita un código OTP")]
         public void SeSolicitaOtp()
         {
-            Thread.Sleep(1000); 
+            Thread.Sleep(1000);
         }
 
         [When(@"el usuario ingresa el código ""(.*)""")]
