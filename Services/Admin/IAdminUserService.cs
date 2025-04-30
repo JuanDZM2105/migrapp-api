@@ -18,5 +18,7 @@ namespace migrapp_api.Services.Admin
         Task<List<UserLogDto>> GetUserLogsAsync(int userId);
         Task<List<UserLogDto>> GetFilteredUserLogsAsync(int userId, UserLogQueryParams queryParams);
         Task<UserLogFiltersDto> GetUserLogFiltersAsync(int userId);
+        Task<LogResponseDto> GetAllLogsAsync(UserLogQueryParams queryParams, int currentUserId);
+        Task<UserLogFiltersDto> GetAllLogFiltersAsync(int currentUserId);
     }
 }

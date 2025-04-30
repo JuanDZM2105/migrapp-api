@@ -531,5 +531,113 @@ namespace migrapp_api.Services.Admin
             return await _userLogRepository.GetUserLogFiltersAsync(userId);
         }
 
+        public async Task<LogResponseDto> GetAllLogsAsync(UserLogQueryParams queryParams, int currentUserId)
+        {
+            var currentUser = await _userRepository.GetByIdAsync(currentUserId);
+
+            if (currentUser == null)
+            {
+                throw new Exception("Usuario no encontrado");
+            }
+
+            if (currentUser.Type == "admin" || currentUser.Type == "reader" || currentUser.HasAccessToAllUsers)
+            {
+                var allLogs = await _userLogRepository.GetAllFilteredLogsAsync(queryParams);
+                var totalCount = await _userLogRepository.GetTotalLogCountAsync(queryParams);
+
+                var logDtos = allLogs.Select(log => new UserLogDto
+                {
+                    ActionType = log.ActionType,
+                    IpAddress = log.IpAddress,
+                    Description = log.Description,
+                    ActionDate = log.ActionDate
+                }).ToList();
+
+                return new LogResponseDto
+                {
+                    Logs = logDtos,
+                    TotalCount = totalCount,
+                    Page = queryParams.Page,
+                    PageSize = queryParams.PageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / queryParams.PageSize)
+                };
+            }
+            else if (currentUser.Type == "lawyer" || currentUser.Type == "auditor")
+            {
+                var assignedUsers = await _assignedUserRepository.GetAssignedUsersAsync(currentUserId);
+                var assignedUserIds = assignedUsers
+                    .Where(au => au.ProfessionalUserId == currentUserId)
+                    .Select(au => au.ClientUserId)
+                    .ToList();
+
+                var filteredLogs = await _userLogRepository.GetLogsForUserIdsAsync(assignedUserIds, queryParams);
+                var totalCount = await _userLogRepository.GetTotalLogCountForUserIdsAsync(assignedUserIds, queryParams);
+
+                var logDtos = filteredLogs.Select(log => new UserLogDto
+                {
+                    ActionType = log.ActionType,
+                    IpAddress = log.IpAddress,
+                    Description = log.Description,
+                    ActionDate = log.ActionDate
+                }).ToList();
+
+                return new LogResponseDto
+                {
+                    Logs = logDtos,
+                    TotalCount = totalCount,
+                    Page = queryParams.Page,
+                    PageSize = queryParams.PageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / queryParams.PageSize)
+                };
+            }
+
+            // Para otros tipos de usuario, no tienen acceso
+            return new LogResponseDto
+            {
+                Logs = new List<UserLogDto>(),
+                TotalCount = 0,
+                Page = queryParams.Page,
+                PageSize = queryParams.PageSize,
+                TotalPages = 0
+            };
+        }
+
+        public async Task<UserLogFiltersDto> GetAllLogFiltersAsync(int currentUserId)
+        {
+            var currentUser = await _userRepository.GetByIdAsync(currentUserId);
+
+            if (currentUser == null)
+            {
+                throw new Exception("Usuario no encontrado");
+            }
+
+            if (currentUser.Type == "admin" || currentUser.Type == "reader")
+            {
+                return await _userLogRepository.GetAllLogFiltersAsync();
+            }
+            else if (currentUser.Type == "lawyer" || currentUser.Type == "auditor")
+            {
+                if (currentUser.HasAccessToAllUsers)
+                {
+                    return await _userLogRepository.GetAllLogFiltersAsync();
+                }
+
+                var assignedUsers = await _assignedUserRepository.GetAssignedUsersAsync(currentUserId);
+                var assignedUserIds = assignedUsers
+                    .Where(au => au.ProfessionalUserId == currentUserId)
+                    .Select(au => au.ClientUserId)
+                    .ToList();
+
+                return await _userLogRepository.GetLogFiltersForUserIdsAsync(assignedUserIds);
+            }
+
+            // Para otros tipos de usuario, filtros vacíos
+            return new UserLogFiltersDto
+            {
+                ActionTypes = new List<string>(),
+                IpAddresses = new List<string>()
+            };
+        }
+
     }
 }

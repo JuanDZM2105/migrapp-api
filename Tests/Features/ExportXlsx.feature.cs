@@ -35,7 +35,7 @@ namespace migrapp_api.Tests.Features
         public virtual void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Exportar reportes en formato XLSX", "  Como administrador,\r\n  Quiero exportar y descargar reportes del sistema en form" +
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Tests/Features", "Exportar reportes en formato XLSX", "  Como administrador,\r\n  Quiero exportar y descargar reportes del sistema en form" +
                     "ato XLSX\r\n  Para analizar la informaci�n fuera de la plataforma", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }

@@ -281,5 +281,55 @@ namespace migrapp_api.Controllers.Admin
                 return StatusCode(500, new { message = "Ocurrió un error al obtener los filtros", details = ex.Message });
             }
         }
+
+        [HttpGet("logs")]
+        [Authorize]
+        public async Task<IActionResult> GetAllLogs([FromQuery] UserLogQueryParams queryParams)
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                // Establecer valores por defecto si no se especifican
+                if (string.IsNullOrEmpty(queryParams.SortBy))
+                {
+                    queryParams.SortBy = "actionDate";
+                }
+                if (string.IsNullOrEmpty(queryParams.SortDirection))
+                {
+                    queryParams.SortDirection = "desc";
+                }
+
+                var logResponse = await _adminUserService.GetAllLogsAsync(queryParams, currentUserId);
+
+                if (logResponse == null || logResponse.Logs == null || !logResponse.Logs.Any())
+                {
+                    return NotFound(new { message = "No se encontraron logs disponibles." });
+                }
+
+                return Ok(logResponse);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener los logs", details = ex.Message });
+            }
+        }
+
+        [HttpGet("logs/filters")]
+        [Authorize]
+        public async Task<IActionResult> GetAllLogFilters()
+        {
+            try
+            {
+                var currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                var filters = await _adminUserService.GetAllLogFiltersAsync(currentUserId);
+                return Ok(filters);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocurrió un error al obtener los filtros de logs", details = ex.Message });
+            }
+        }
     }
 }
