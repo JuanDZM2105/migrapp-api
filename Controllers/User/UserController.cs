@@ -4,6 +4,9 @@ using System.Linq;
 using migrapp_api.Data;
 using migrapp_api.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using migrapp_api.Services.Admin;
+using migrapp_api.Helpers.Admin;
+using System.Security.Claims;
 
 namespace migrapp_api.Controllers.User
 {
@@ -14,11 +17,15 @@ namespace migrapp_api.Controllers.User
     {
         private readonly IWebHostEnvironment _env;
         private readonly ApplicationDbContext _context;
+        private readonly ILogService _logService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserController(ApplicationDbContext context, IWebHostEnvironment env)
+        public UserController(ApplicationDbContext context, IWebHostEnvironment env, ILogService logService, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _env = env;
+            _logService = logService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet("{userId}/profile")]
@@ -74,6 +81,14 @@ namespace migrapp_api.Controllers.User
 
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
+
+            string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+            int currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? userId.ToString());
+            await _logService.LogActionAsync(
+                    currentUserId,
+                    LogActionTypes.Update,
+                    "Usuario actualizado exitosamente",
+                    ipAddress);
 
             return Ok(new { message = "Usuario actualizado exitosamente", user });
         }

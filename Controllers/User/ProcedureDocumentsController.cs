@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using migrapp_api.Services.User;
 using System.Threading.Tasks;
 using System.Security.Claims;
+using migrapp_api.Services.Admin;
+using migrapp_api.Helpers.Admin;
 
 [ApiController]
 [Route("api/procedures/{procedureId}/documents")]
@@ -11,11 +13,18 @@ using System.Security.Claims;
 public class ProcedureDocumentsController : ControllerBase
 {
   private readonly IProcedureDocumentService _documentService;
+  private readonly ILogService _logService;
+  private readonly IHttpContextAccessor _httpContextAccessor;
 
-  public ProcedureDocumentsController(IProcedureDocumentService documentService)
+    public ProcedureDocumentsController(
+     IProcedureDocumentService documentService,
+     ILogService logService,
+    IHttpContextAccessor httpContextAccessor)
   {
     _documentService = documentService;
-  }
+        _logService = logService;
+        _httpContextAccessor = httpContextAccessor;
+    }
 
   // POST: subir documento
   [HttpPost("{procedureDocumentId}/upload")]
@@ -27,7 +36,14 @@ public class ProcedureDocumentsController : ControllerBase
 
       var doc = await _documentService.UploadAsync(procedureDocumentId, file, userId);
 
-      return Ok(new
+      string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+      await _logService.LogActionAsync(
+        userId,
+        LogActionTypes.Create,
+        $"Documento de procedimiento subido: {file.FileName}, ID del procedimiento: {procedureId}, ID del documento de procedimiento: {procedureDocumentId}",
+        ipAddress);
+
+            return Ok(new
       {
         doc.Id,
         doc.Name,
@@ -48,8 +64,15 @@ public class ProcedureDocumentsController : ControllerBase
     {
       var userId = GetUserId();
 
-      // Necesitamos cargar el ID del documento desde ProcedureDocument (opcional si ya lo sabes)
-      var streamResult = await _documentService.DownloadAsync(procedureDocumentId);
+      string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+      await _logService.LogActionAsync(
+        userId,
+        LogActionTypes.Download,
+        $"Documento de procedimiento descargado, ID del procedimiento: {procedureId}, ID del documento de procedimiento: {procedureDocumentId}",
+        ipAddress);
+
+            // Necesitamos cargar el ID del documento desde ProcedureDocument (opcional si ya lo sabes)
+            var streamResult = await _documentService.DownloadAsync(procedureDocumentId);
       return streamResult;
     }
     catch (Exception ex)
@@ -66,7 +89,15 @@ public class ProcedureDocumentsController : ControllerBase
     {
       var userId = GetUserId();
       var doc = await _documentService.ReplaceAsync(procedureDocumentId, file, userId);
-      return Ok(new
+
+      string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+      await _logService.LogActionAsync(
+        userId,
+        LogActionTypes.Update,
+        $"Documento de procedimiento reemplazado: {file.FileName}, ID del procedimiento: {procedureId}, ID del documento de procedimiento: {procedureDocumentId}",
+        ipAddress);
+
+            return Ok(new
       {
         doc.Id,
         doc.Name,
@@ -87,7 +118,15 @@ public class ProcedureDocumentsController : ControllerBase
     {
       var userId = GetUserId();
       await _documentService.DeleteAsync(procedureDocumentId, userId);
-      return NoContent();
+
+      string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+      await _logService.LogActionAsync(
+       userId, 
+       LogActionTypes.Delete,
+       $"Documento de procedimiento eliminado, ID del procedimiento: {procedureId}, ID del documento de procedimiento: {procedureDocumentId}",
+       ipAddress);
+
+            return NoContent();
     }
     catch (Exception ex)
     {

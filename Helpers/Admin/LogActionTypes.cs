@@ -8,6 +8,7 @@
         public const string Update = "Update";
         public const string Delete = "Delete";
         public const string Export = "Export";
+        public const string Download = "Download";
         public const string PasswordChange = "Password Change";
     }
 }
