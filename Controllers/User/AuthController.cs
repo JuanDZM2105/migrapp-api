@@ -5,6 +5,8 @@ using migrapp_api.Models;
 using Microsoft.EntityFrameworkCore;
 using OtpNet;
 using UserModel = migrapp_api.Models.User;
+using migrapp_api.Services.Admin;
+using migrapp_api.Helpers.Admin;
 
 
 namespace migrapp_api.Controllers
@@ -15,12 +17,15 @@ namespace migrapp_api.Controllers
     {
         private readonly ApplicationDbContext _appDbContext;
         private readonly ILoginService _loginService;
+        private readonly ILogService _logService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuthController(ApplicationDbContext appDbContext, ILoginService loginService)
+        public AuthController(ApplicationDbContext appDbContext, ILoginService loginService, ILogService logService, IHttpContextAccessor httpContextAccessor)
         {
             _appDbContext = appDbContext;
             _loginService = loginService;
-
+            _logService = logService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("register")]
@@ -63,6 +68,13 @@ namespace migrapp_api.Controllers
 
             if (user.Id != 0)
             {
+                string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                await _logService.LogActionAsync(
+                    user.Id,
+                    LogActionTypes.Create,
+                    $"Nuevo usuario registrado: {user.Email}",
+                    ipAddress);
+
                 return Ok(new { message = "Usuario registrado exitosamente" });
             }
 
@@ -77,12 +89,20 @@ namespace migrapp_api.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Usuario no encontrado" });
 
+
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 return Unauthorized(new { message = "Credenciales invï¿½lidas" });
 
             var trustedResult = await _loginService.VerifyTrustedDevice(HttpContext, user, dto.RememberMe);
             if (trustedResult != null && trustedResult.DeviceIsTrusted)
             {
+                string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+                await _logService.LogActionAsync(
+                    user.Id,
+                    LogActionTypes.Login,
+                    "Inicio de sesión exitoso",
+                    ipAddress);
+
                 return Ok(trustedResult);
             }
 

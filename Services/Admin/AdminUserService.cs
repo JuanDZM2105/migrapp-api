@@ -7,6 +7,7 @@ using UserModel = migrapp_api.Models.User;
 using OfficeOpenXml;
 using System.IO;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 
 
 namespace migrapp_api.Services.Admin
@@ -339,6 +340,15 @@ namespace migrapp_api.Services.Admin
 
                     rowIndex++;
                 }
+
+                string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
+
+                await _logService.LogActionAsync(
+                    userId,
+                    LogActionTypes.Export,
+                    $"Exportación de datos de usuarios a Excel.",
+                    ipAddress
+                );
 
                 // Retornar el archivo Excel como un array de bytes
                 return package.GetAsByteArray();
