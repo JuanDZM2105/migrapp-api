@@ -63,6 +63,7 @@ builder.Services.AddSingleton<ISmsHelper, SmsHelper>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddScoped<IColumnVisibilityService, ColumnVisibilityService>();
 builder.Services.AddScoped<IUserLogRepository, UserLogRepository>();
+builder.Services.AddScoped<ILegalProcessRepository, LegalProcessRepository>();
 
 builder.Services.AddScoped<IProcedureDocumentService, ProcedureDocumentService>();
 builder.Services.AddScoped<IHelpCenterService, HelpCenterService>();
@@ -70,6 +71,9 @@ builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<IMetricsRepository, MetricsRepository>();
 builder.Services.AddScoped<IMetricsService, MetricsService>();
+builder.Services.AddScoped<ILegalProcessService, LegalProcessService>();
+builder.Services.AddScoped<IProcedureService, ProcedureService>();
+
 
 
 

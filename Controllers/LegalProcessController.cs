@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using migrapp_api.Data;
 using Microsoft.AspNetCore.Authorization;
+using migrapp_api.Services.Admin;
+using migrapp_api.DTOs.Admin;
+using System.Security.Claims;
 
 namespace migrapp_api.Controllers
 {
@@ -12,10 +15,12 @@ namespace migrapp_api.Controllers
     public class LegalProcessController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILegalProcessService _legalProcessService;
 
-        public LegalProcessController(ApplicationDbContext context)
+        public LegalProcessController(ApplicationDbContext context, ILegalProcessService legalProcessService)
         {
             _context = context;
+            _legalProcessService = legalProcessService;
         }
 
         [HttpGet("user/{userId}")]
@@ -103,5 +108,24 @@ namespace migrapp_api.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateLegalProcess([FromBody] CreateLegalProcessDto dto)
+        {
+            try
+            {
+                // Obtener el ID del abogado que hace la petición desde los claims
+                var lawyerUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+                var legalProcess = await _legalProcessService.CreateLegalProcessAsync(dto, lawyerUserId);
+
+                return Ok(new { message = "proceso legal creado exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
     }
 }
