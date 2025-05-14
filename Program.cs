@@ -73,6 +73,8 @@ builder.Services.AddScoped<IMetricsRepository, MetricsRepository>();
 builder.Services.AddScoped<IMetricsService, MetricsService>();
 builder.Services.AddScoped<ILegalProcessService, LegalProcessService>();
 builder.Services.AddScoped<IProcedureService, ProcedureService>();
+builder.Services.AddScoped<IDocumentService, DocumentService>();
+builder.Services.AddScoped<IAdminProcedureDocumentService, AdminProcedureDocumentService>();
 
 
 
