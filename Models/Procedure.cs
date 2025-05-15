@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace migrapp_api.Models
 {
@@ -11,9 +12,11 @@ namespace migrapp_api.Models
     public DateTime? DueDate { get; set; }
 
     public int LegalProcessId { get; set; }
+
+    [JsonIgnore]
     public LegalProcess LegalProcess { get; set; }
 
-    public ICollection<ProcedureDocument> ProcedureDocuments { get; set; } = new List<ProcedureDocument>();
+        public ICollection<ProcedureDocument> ProcedureDocuments { get; set; } = new List<ProcedureDocument>();
   }
 }
 
