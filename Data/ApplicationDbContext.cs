@@ -20,6 +20,8 @@ namespace migrapp_api.Data
         public DbSet<UserMfaCode> UserMfaCodes { get; set; }
         public DbSet<ColumnVisibility> ColumnVisibilities { get; set; }
 
+        public DbSet<Message> Messages { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -85,13 +85,26 @@ namespace migrapp_api.Controllers.User
             string ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "Unknown";
             int currentUserId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? userId.ToString());
             await _logService.LogActionAsync(
-                    currentUserId,
-                    LogActionTypes.Update,
-                    "Usuario actualizado exitosamente",
-                    ipAddress);
+                currentUserId,
+                LogActionTypes.Update,
+                "Usuario actualizado exitosamente",
+                ipAddress);
 
-            return Ok(new { message = "Usuario actualizado exitosamente", user });
+            var response = new UserResponseDto
+            {
+                Id = user.Id,
+                Name = user.Name,
+                LastName = user.LastName,
+                PhonePrefix = user.PhonePrefix,
+                Phone = user.Phone,
+                Country = user.Country,
+                BirthDate = user.BirthDate,
+                ImageUrl = user.ImageUrl
+            };
+
+            return Ok(new { message = "Usuario actualizado exitosamente", user = response });
         }
+
 
         [HttpPost("disable/{userId}")]
         public async Task<IActionResult> Disable(int userId)

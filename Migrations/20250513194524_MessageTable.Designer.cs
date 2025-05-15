@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using migrapp_api.Data;
 
@@ -11,9 +12,11 @@ using migrapp_api.Data;
 namespace migrapp_api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250513194524_MessageTable")]
+    partial class MessageTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +53,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("ProfessionalUserId");
 
-                    b.ToTable("AssignedUsers", (string)null);
+                    b.ToTable("AssignedUsers");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.ColumnVisibility", b =>
@@ -72,7 +75,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ColumnVisibilities", (string)null);
+                    b.ToTable("ColumnVisibilities");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.Document", b =>
@@ -106,7 +109,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Documents", (string)null);
+                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.LegalProcess", b =>
@@ -157,7 +160,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("LawyerUserId");
 
-                    b.ToTable("LegalProcesses", (string)null);
+                    b.ToTable("LegalProcesses");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.Message", b =>
@@ -189,7 +192,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages", (string)null);
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.Procedure", b =>
@@ -218,7 +221,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("LegalProcessId");
 
-                    b.ToTable("Procedures", (string)null);
+                    b.ToTable("Procedures");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.ProcedureDocument", b =>
@@ -259,7 +262,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("ProcedureId");
 
-                    b.ToTable("ProcedureDocuments", (string)null);
+                    b.ToTable("ProcedureDocuments");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.User", b =>
@@ -339,7 +342,7 @@ namespace migrapp_api.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.UserLog", b =>
@@ -375,7 +378,7 @@ namespace migrapp_api.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLogs", (string)null);
+                    b.ToTable("UserLogs");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.UserMfaCode", b =>
@@ -399,7 +402,7 @@ namespace migrapp_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserMfaCodes", (string)null);
+                    b.ToTable("UserMfaCodes");
                 });
 
             modelBuilder.Entity("migrapp_api.Models.AssignedUser", b =>
