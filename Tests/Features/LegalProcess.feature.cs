@@ -20,23 +20,24 @@ namespace migrapp_api.Tests.Features
     [System.CodeDom.Compiler.GeneratedCodeAttribute("TechTalk.SpecFlow", "3.9.0.0")]
     [System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Exportar reportes en formato XLSX")]
-    public partial class ExportarReportesEnFormatoXLSXFeature
+    [NUnit.Framework.DescriptionAttribute("Consulta de procesos legales de un usuario")]
+    public partial class ConsultaDeProcesosLegalesDeUnUsuarioFeature
     {
         
         private TechTalk.SpecFlow.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-#line 1 "ExportXlsx.feature"
+#line 1 "LegalProcess.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
         public virtual void FeatureSetup()
         {
             testRunner = TechTalk.SpecFlow.TestRunnerManager.GetTestRunner();
-            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Exportar reportes en formato XLSX", "  Como administrador,\r\n  Quiero exportar y descargar reportes del sistema en form" +
-                    "ato XLSX\r\n  Para analizar la informaci�n fuera de la plataforma", ProgrammingLanguage.CSharp, featureTags);
+            TechTalk.SpecFlow.FeatureInfo featureInfo = new TechTalk.SpecFlow.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Features", "Consulta de procesos legales de un usuario", "  Como administrador\r\n  Quiero consultar la lista de procesos legales asociados a" +
+                    " un usuario\r\n  Para validar que el endpoint funciona correctamente y devuelve la" +
+                    " informaci�n esperada", ProgrammingLanguage.CSharp, featureTags);
             testRunner.OnFeatureStart(featureInfo);
         }
         
@@ -75,12 +76,12 @@ namespace migrapp_api.Tests.Features
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("Descarga de archivo con formato correcto")]
-        public void DescargaDeArchivoConFormatoCorrecto()
+        [NUnit.Framework.DescriptionAttribute("Obtener procesos legales para usuario con Id 1")]
+        public void ObtenerProcesosLegalesParaUsuarioConId1()
         {
             string[] tagsOfScenario = ((string[])(null));
             System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new System.Collections.Specialized.OrderedDictionary();
-            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Descarga de archivo con formato correcto", null, tagsOfScenario, argumentsOfScenario, featureTags);
+            TechTalk.SpecFlow.ScenarioInfo scenarioInfo = new TechTalk.SpecFlow.ScenarioInfo("Obtener procesos legales para usuario con Id 1", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 7
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
@@ -92,13 +93,13 @@ namespace migrapp_api.Tests.Features
             {
                 this.ScenarioStart();
 #line 8
-    testRunner.Given("que el archivo XLSX fue generado exitosamente", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Given ");
+    testRunner.When("consulto los procesos legales del usuario con Id 1", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "When ");
 #line hidden
 #line 9
-    testRunner.Then("debe contener encabezados claros y los datos organizados por columnas", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.Then("la respuesta debe ser exitosa", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
 #line hidden
 #line 10
-    testRunner.Then("debe poder abrirse correctamente en Excel u otro lector de hojas de calculo", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "Then ");
+    testRunner.And("la respuesta debe contener una lista con objetos de proceso legal validos", ((string)(null)), ((TechTalk.SpecFlow.Table)(null)), "And ");
 #line hidden
             }
             this.ScenarioCleanup();
