@@ -37,17 +37,18 @@ namespace migrapp_api.Hubs
 
             if (currentUser == null)
             {
-                Console.WriteLine($"❌ No se encontró el usuario con ID {currentUserId}");
+                Console.WriteLine($"No se encontró el usuario con ID {currentUserId}");
                 return;
             }
 
+            // Registrar o actualizar la conexión del usuario
             if (onlineUsers.ContainsKey(currentUserId))
             {
                 onlineUsers[currentUserId].ConnectionId = connectionId;
             }
             else
             {
-                var user = new OnlineUserDto
+                var userDto = new OnlineUserDto
                 {
                     ConnectionId = connectionId,
                     Name = currentUser.Name,
@@ -55,18 +56,106 @@ namespace migrapp_api.Hubs
                     LastName = currentUser.LastName
                 };
 
-                onlineUsers.TryAdd(currentUserId, user);
+                onlineUsers.TryAdd(currentUserId, userDto);
                 await Clients.AllExcept(connectionId).SendAsync("Notify", currentUser);
             }
 
+            // Cargar mensajes si se pasa un senderId
             if (int.TryParse(receiverIdStr, out int receiverId))
             {
                 await LoadMessages(receiverId);
             }
+            Console.WriteLine($"[DEBUG] tipo {currentUser.Type}");
+            // Si es cliente, enviarle su abogado asignado
+            if (currentUser.Type != "lawyer")
+            {
+                Console.WriteLine($"[DEBUG] Usuario conectado: ID={currentUserId}, Tipo={currentUser.Type}");
 
-            await Clients.All.SendAsync("OnlineUsers", await _userService.GetOnlineUsersAsync(currentUserId, onlineUsers));
+                var assignedLawyerId = await _context.AssignedUsers
+                    .Where(a => a.ClientUserId == currentUserId)
+                    .Select(a => a.ProfessionalUserId)
+                    .FirstOrDefaultAsync();
+
+                Console.WriteLine($"[DEBUG] Abogado asignado para cliente {currentUserId}: {assignedLawyerId}");
+
+                if (assignedLawyerId != 0)
+                {
+                    var lawyer = await _userService.GetByIdAsync(assignedLawyerId);
+                    if (lawyer != null)
+                    {
+                        var isOnline = onlineUsers.ContainsKey(assignedLawyerId);
+                        var unreadCount = await _context.Messages
+                            .CountAsync(x =>
+                                x.ReceiverId == currentUserId &&
+                                x.SenderId == assignedLawyerId &&
+                                !x.IsRead);
+
+                        var result = new List<OnlineUserDto>
+                        {
+                            new OnlineUserDto
+                            {
+                                Id = lawyer.Id,
+                                Name = lawyer.Name,
+                                LastName = lawyer.LastName,
+                                ImageUrl = lawyer.ImageUrl,
+                                IsOnline = isOnline,
+                                ConnectionId = isOnline ? onlineUsers[assignedLawyerId].ConnectionId : null,
+                                UnreadCount = unreadCount
+                            }
+                        };
+
+                        await Clients.Caller.SendAsync("AllLawyers", result);
+                    }
+                }
+            }
+            else if (currentUser.Type == "lawyer")
+            {
+                Console.WriteLine($"[DEBUG] Usuario abogado conectado: ID={currentUserId}");
+
+                // Obtener IDs de los clientes asignados
+                var assignedClientIds = await _context.AssignedUsers
+                    .Where(a => a.ProfessionalUserId == currentUserId && a.ProfessionalRole == "lawyer")
+                    .Select(a => a.ClientUserId)
+                    .ToListAsync();
+
+                Console.WriteLine($"[DEBUG] Clientes asignados: {string.Join(", ", assignedClientIds)}");
+
+                if (assignedClientIds.Any())
+                {
+                    var clients = await _context.Users
+                        .Where(u => assignedClientIds.Contains(u.Id))
+                        .ToListAsync();
+
+                    var result = new List<OnlineUserDto>();
+
+                    foreach (var client in clients)
+                    {
+                        var isOnline = onlineUsers.ContainsKey(client.Id);
+                        var unreadCount = await _context.Messages
+                            .CountAsync(x =>
+                                x.ReceiverId == currentUserId &&
+                                x.SenderId == client.Id &&
+                                !x.IsRead);
+
+                        result.Add(new OnlineUserDto
+                        {
+                            Id = client.Id,
+                            Name = client.Name,
+                            LastName = client.LastName,
+                            ImageUrl = client.ImageUrl,
+                            IsOnline = isOnline,
+                            ConnectionId = isOnline ? onlineUsers[client.Id].ConnectionId : null,
+                            UnreadCount = unreadCount
+                        });
+                    }
+
+                    await Clients.Caller.SendAsync("AssignedClients", result);
+                }
+            }
         }
 
+
+ 
 
         public async Task LoadMessages(int receiverId, int pageNumber = 1)
         {
@@ -163,12 +252,6 @@ namespace migrapp_api.Hubs
             .ToList();
 
             return result;
-        }
-
-        public Task Ping()
-        {
-            Console.WriteLine("📡 Ping recibido");
-            return Task.CompletedTask;
         }
     }
 }

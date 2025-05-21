@@ -49,7 +49,7 @@ namespace migrapp_api.Controllers
                 PasswordHash = hashedPassword,
                 Country = " ",
                 AccountStatus = "Active",
-                Type = "Client",
+                Type = "user",
                 LastLogin = DateTime.UtcNow,
                 IsActiveNow = true,
                 OtpSecretKey = base32SecretKey,

@@ -42,5 +42,12 @@ namespace migrapp_api.Services.User
                 .OrderByDescending(u => u.IsOnline)
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<UserModel>> GetByIdsAsync(List<int> userIds)
+        {
+            return await _context.Users
+                .Where(u => userIds.Contains(u.Id))
+                .ToListAsync();
+        }
     }
 }
