@@ -19,6 +19,12 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "Migrapp.Tests": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Testing"
+      }
+    },
     "https": {
       "commandName": "Project",
       "dotnetRunMessages": true,

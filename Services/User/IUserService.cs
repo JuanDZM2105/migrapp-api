@@ -9,6 +9,8 @@ namespace migrapp_api.Services.User
         Task<UserModel?> GetByIdAsync(int id);
         Task<List<UserModel>> GetAllAsync();
         Task<List<OnlineUserDto>> GetOnlineUsersAsync(int currentUserId, ConcurrentDictionary<int, OnlineUserDto> onlineUsers);
+
+        Task<IEnumerable<UserModel>> GetByIdsAsync(List<int> userIds);
     }
 
 }
